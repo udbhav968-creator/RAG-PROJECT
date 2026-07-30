@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rag-config
+  namespace: rag
+data:
+  MODEL_NAME: "gpt-4"
+  EMBEDDING_MODEL: "text-embedding-ada-002"
+  FAITHFULNESS_THRESHOLD: "0.7"
+  MAX_CORRECTION_ATTEMPTS: "2"
+  TOP_K_RETRIEVAL: "5"
+  CACHE_TTL: "3600"

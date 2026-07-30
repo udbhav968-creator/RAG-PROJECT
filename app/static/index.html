@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Industrial RAG - Enterprise AI Detection & Self-Correction Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f4ff',
+              100: '#e0eaff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      margin: 0;
+      padding: 0;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glow-effect {
+      box-shadow: 0 0 35px rgba(99, 102, 241, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="border-b border-slate-800 bg-slate-950/90 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-row items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/20 shrink-0">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-xl text-white tracking-tight flex items-center gap-2">
+            Industrial <span class="gradient-text">RAG Portal</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 font-mono font-semibold">v2.0 Enterprise</span>
+          </h1>
+          <p class="text-xs text-slate-400">AI Faithfulness Evaluation, Hybrid BM25 Search & Self-Correction Engine</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/api/v1/audit/export" target="_blank" class="text-xs px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 transition font-medium flex items-center gap-1.5 font-mono">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export CSV Audit
+        </a>
+        <div id="system-badge" class="hidden md:flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="vector-store-label">VectorStore: Active</span>
+        </div>
+        <a href="/docs" target="_blank" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition font-medium flex items-center gap-1.5 border border-slate-700">
+          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+          API Docs
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1 w-full">
+
+    <!-- METRICS TELEMETRY CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+      <div class="glass-card rounded-2xl p-4 border border-slate-800 flex items-center gap-3.5">
+        <div class="p-3 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20 shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Total Queries</div>
+          <div id="stat-queries" class="text-2xl font-bold font-display text-white">0</div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-slate-800 flex items-center gap-3.5">
+        <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Avg Faithfulness</div>
+          <div id="stat-faithfulness" class="text-2xl font-bold font-display text-emerald-400">100%</div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-slate-800 flex items-center gap-3.5">
+        <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Cache Hit Rate</div>
+          <div id="stat-cache" class="text-2xl font-bold font-display text-cyan-400">0%</div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-slate-800 flex items-center gap-3.5">
+        <div class="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 font-medium">Ingested Documents</div>
+          <div id="stat-docs" class="text-2xl font-bold font-display text-white">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUERY CONSOLE SECTION -->
+    <div class="glass-card rounded-3xl p-6 sm:p-8 glow-effect space-y-6 w-full">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-xl font-display font-bold text-white flex items-center gap-2">
+            🤖 AI RAG Query Console
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Pose questions to retrieve knowledge & inspect automatic self-correction attempts</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-mono">LLM Model:</span>
+            <select id="select-model-name" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-brand-500">
+              <option value="gpt-4" selected>GPT-4 (Enterprise Default)</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
+              <option value="local">Local Grounder (Offline Fallback)</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-mono">Attempts:</span>
+            <select id="select-max-attempts" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-brand-500">
+              <option value="1">1 Attempt</option>
+              <option value="2" selected>2 Attempts</option>
+              <option value="3">3 Attempts</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick sample prompts -->
+      <div class="flex flex-wrap gap-2 text-xs items-center">
+        <span class="text-slate-500 font-medium">Quick Prompts:</span>
+        <button type="button" onclick="setQueryPrompt('What is the Industrial RAG Engine and how does it work?')" class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">What is Industrial RAG?</button>
+        <button type="button" onclick="setQueryPrompt('How does the self-correction loop evaluate faithfulness?')" class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Self-Correction Loop</button>
+        <button type="button" onclick="setQueryPrompt('What roles do Celery, Redis, and Pinecone play in the pipeline?')" class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Celery & Redis Architecture</button>
+      </div>
+
+      <!-- Search Form -->
+      <form id="query-form" onsubmit="handleQuerySubmit(event)" class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <input type="text" id="query-input" required placeholder="Ask any question grounded in the ingested knowledge base..." class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-4 py-3.5 pl-11 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-inner">
+          <svg class="w-5 h-5 text-slate-500 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <button type="submit" id="btn-submit-query" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-medium text-sm transition shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 shrink-0">
+          <span>Run RAG Pipeline</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </button>
+      </form>
+
+      <!-- QUERY RESULTS PANEL -->
+      <div id="query-result-panel" class="hidden space-y-6 pt-4 border-t border-slate-800">
+        
+        <!-- Answer Box -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 space-y-3 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-brand-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-brand-400"></span> Final Generated Answer
+            </span>
+            <div id="faithfulness-badge" class="px-3 py-1 rounded-full text-xs font-semibold font-mono border">
+              --
+            </div>
+          </div>
+          <p id="result-final-answer" class="text-slate-100 text-base leading-relaxed font-sans font-normal">
+            --
+          </p>
+
+          <!-- Citation Badges -->
+          <div id="citations-row" class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80 text-xs">
+            <span class="text-slate-400 font-semibold self-center">Grounded Sources:</span>
+            <div id="citations-container" class="flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+
+        <!-- Attempts Breakdown Inspector -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            🔄 Iterative Self-Correction Breakdown
+            <span id="attempts-count-badge" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-xs">0 Attempts</span>
+          </h3>
+
+          <div id="attempts-container" class="space-y-3">
+            <!-- Dynamic Attempt Cards -->
+          </div>
+        </div>
+
+        <!-- Retrieved Contexts Drawer -->
+        <div class="space-y-2">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">📚 Grounded Source Contexts</h3>
+          <div id="contexts-container" class="space-y-2">
+            <!-- Context snippets -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- KNOWLEDGE BASE & DOCUMENT MANAGEMENT -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
+      
+      <!-- Upload Document & PDF/DOCX Card -->
+      <div class="glass-card rounded-3xl p-6 space-y-4 border border-slate-800">
+        <h2 class="text-lg font-display font-bold text-white flex items-center gap-2">
+          📥 Ingest New Document
+        </h2>
+        
+        <!-- Tab selector for Upload vs Paste -->
+        <div class="flex border-b border-slate-800 gap-4 text-xs font-medium">
+          <button type="button" id="tab-file" onclick="switchIngestTab('file')" class="pb-2 text-brand-400 border-b-2 border-brand-500 font-semibold">📁 Upload PDF / DOCX / TXT</button>
+          <button type="button" id="tab-text" onclick="switchIngestTab('text')" class="pb-2 text-slate-400 hover:text-slate-200">📝 Paste Raw Text</button>
+        </div>
+
+        <!-- File Upload Form -->
+        <form id="file-upload-form" onsubmit="handleFileUploadSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Select File (.pdf, .docx, .txt)</label>
+            <input type="file" id="upload-file-input" required accept=".pdf,.docx,.txt" class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 text-xs focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Custom Document ID (Optional)</label>
+            <input type="text" id="upload-doc-id" placeholder="Leave blank to use filename" class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-brand-500">
+          </div>
+          <button type="submit" id="btn-upload-file" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-medium text-xs transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Upload & Vectorize File
+          </button>
+        </form>
+
+        <!-- Paste Text Form (Hidden initially) -->
+        <form id="ingest-form" onsubmit="handleIngestSubmit(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Document ID / Title</label>
+            <input type="text" id="ingest-doc-id" required placeholder="e.g. SAFETY_GUIDELINES_2026" class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-brand-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Document Content</label>
+            <textarea id="ingest-content" required rows="5" placeholder="Paste raw text document content here..." class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-brand-500 font-mono"></textarea>
+          </div>
+
+          <button type="submit" id="btn-ingest-doc" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs border border-slate-700 transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Ingest Text Content
+          </button>
+        </form>
+      </div>
+
+      <!-- Active Knowledge Base Library -->
+      <div class="lg:col-span-2 glass-card rounded-3xl p-6 space-y-4 border border-slate-800 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 class="text-lg font-display font-bold text-white flex items-center gap-2">
+              📖 Knowledge Base Library
+            </h2>
+            <button type="button" onclick="loadDocuments()" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1 font-medium">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh Library
+            </button>
+          </div>
+
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                  <th class="py-2.5 px-3">Document ID</th>
+                  <th class="py-2.5 px-3">Chunk Count</th>
+                  <th class="py-2.5 px-3">Sample Excerpt</th>
+                  <th class="py-2.5 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="docs-table-body" class="divide-y divide-slate-800/60 text-xs">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+          <span>Industrial RAG System &copy; 2026</span>
+          <span>Pinecone v3 + In-Memory Store Fallback</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500 w-full">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>Industrial RAG with AI Detection & Correction &copy; 2026</div>
+      <div class="flex items-center gap-3 text-slate-400 font-mono">
+        <span>FastAPI</span>
+        <span>&bull;</span>
+        <span>LangChain</span>
+        <span>&bull;</span>
+        <span>Pinecone</span>
+        <span>&bull;</span>
+        <span>Redis</span>
+        <span>&bull;</span>
+        <span>Celery</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE = '/api/v1';
+
+    function switchIngestTab(tab) {
+      if (tab === 'file') {
+        document.getElementById('file-upload-form').classList.remove('hidden');
+        document.getElementById('ingest-form').classList.add('hidden');
+        document.getElementById('tab-file').className = 'pb-2 text-brand-400 border-b-2 border-brand-500 font-semibold';
+        document.getElementById('tab-text').className = 'pb-2 text-slate-400 hover:text-slate-200';
+      } else {
+        document.getElementById('file-upload-form').classList.add('hidden');
+        document.getElementById('ingest-form').classList.remove('hidden');
+        document.getElementById('tab-text').className = 'pb-2 text-brand-400 border-b-2 border-brand-500 font-semibold';
+        document.getElementById('tab-file').className = 'pb-2 text-slate-400 hover:text-slate-200';
+      }
+    }
+
+    function setQueryPrompt(text) {
+      document.getElementById('query-input').value = text;
+      document.getElementById('query-input').focus();
+    }
+
+    async function fetchMetrics() {
+      try {
+        const res = await fetch('/metrics');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('stat-queries').innerText = data.total_queries || 0;
+          document.getElementById('stat-faithfulness').innerText = (data.average_faithfulness_score * 100).toFixed(0) + '%';
+          document.getElementById('stat-cache').innerText = data.cache_hit_rate_percent + '%';
+          document.getElementById('stat-docs').innerText = data.total_ingested_docs || 0;
+        }
+      } catch (e) {
+        console.log('Metrics update error:', e);
+      }
+    }
+
+    async function fetchHealth() {
+      try {
+        const res = await fetch('/health');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('vector-store-label').innerText = `VectorStore: ${data.vector_store}`;
+        }
+      } catch (e) {
+        console.log('Health update error:', e);
+      }
+    }
+
+    async function loadDocuments() {
+      try {
+        const res = await fetch(`${API_BASE}/documents`);
+        if (res.ok) {
+          const data = await res.json();
+          const tbody = document.getElementById('docs-table-body');
+          tbody.innerHTML = '';
+
+          if (!data.documents || data.documents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-500 italic">No documents ingested in library yet.</td></tr>`;
+            return;
+          }
+
+          data.documents.forEach(doc => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-900/50 transition';
+            tr.innerHTML = `
+              <td class="py-3 px-3 font-mono font-semibold text-brand-300">${doc.document_id}</td>
+              <td class="py-3 px-3 font-mono text-slate-300">${doc.chunk_count} chunks</td>
+              <td class="py-3 px-3 text-slate-400 max-w-xs truncate font-sans">${doc.sample_text}</td>
+              <td class="py-3 px-3 text-right">
+                <button type="button" onclick="deleteDoc('${doc.document_id}')" class="text-rose-400 hover:text-rose-300 font-medium hover:underline text-xs">Delete</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (e) {
+        console.log('Load documents error:', e);
+      }
+    }
+
+    async function deleteDoc(docId) {
+      if (!confirm(`Delete document '${docId}' from knowledge base?`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/documents/${docId}`, { method: 'DELETE' });
+        if (res.ok) {
+          loadDocuments();
+          fetchMetrics();
+        }
+      } catch (e) {
+        alert('Failed to delete document: ' + e);
+      }
+    }
+
+    async function handleQuerySubmit(event) {
+      event.preventDefault();
+      const question = document.getElementById('query-input').value.trim();
+      const maxAttempts = parseInt(document.getElementById('select-max-attempts').value);
+      const modelName = document.getElementById('select-model-name').value;
+      if (!question) return;
+
+      const btn = document.getElementById('btn-submit-query');
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Evaluating Faithfulness...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, max_attempts: maxAttempts, model_name: modelName })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          renderQueryResult(data);
+          fetchMetrics();
+        } else {
+          const err = await res.json();
+          alert('Query failed: ' + (err.detail || 'Server error'));
+        }
+      } catch (e) {
+        alert('Query request error: ' + e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Run RAG Pipeline</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+      }
+    }
+
+    function renderQueryResult(data) {
+      document.getElementById('query-result-panel').classList.remove('hidden');
+      document.getElementById('result-final-answer').innerText = data.final_answer;
+
+      // Faithfulness Badge
+      const lastAttempt = data.attempts && data.attempts.length > 0 ? data.attempts[data.attempts.length - 1] : null;
+      const score = lastAttempt ? (lastAttempt.faithfulness_score * 100).toFixed(0) : 100;
+      const fBadge = document.getElementById('faithfulness-badge');
+      
+      if (data.success) {
+        fBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold font-mono bg-emerald-950/80 text-emerald-400 border border-emerald-500/40';
+        fBadge.innerText = `Faithful: ${score}% Score`;
+      } else {
+        fBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold font-mono bg-amber-950/80 text-amber-400 border border-amber-500/40';
+        fBadge.innerText = `Score: ${score}% (Attempt Threshold)`;
+      }
+
+      // Citations Rendering
+      const citContainer = document.getElementById('citations-container');
+      citContainer.innerHTML = '';
+      if (data.citations && data.citations.length > 0) {
+        data.citations.forEach(c => {
+          const span = document.createElement('span');
+          span.className = 'px-2 py-0.5 rounded bg-brand-950/80 text-brand-300 border border-brand-500/30 font-mono text-[11px] font-medium';
+          span.innerText = `[${c.document_id}, Chunk #${c.chunk_index}]`;
+          citContainer.appendChild(span);
+        });
+      } else {
+        citContainer.innerHTML = `<span class="text-slate-500 text-xs italic">No explicit citations</span>`;
+      }
+
+      // Render Correction Attempts
+      document.getElementById('attempts-count-badge').innerText = `${data.attempts ? data.attempts.length : 0} Attempt(s)`;
+      const attemptsContainer = document.getElementById('attempts-container');
+      attemptsContainer.innerHTML = '';
+
+      (data.attempts || []).forEach((att) => {
+        const div = document.createElement('div');
+        div.className = 'bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-2';
+        
+        const isFaith = att.is_faithful;
+        const statusBadge = isFaith 
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 font-mono">PASSED EVALUATION</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-900/60 text-rose-300 border border-rose-500/30 font-mono">FAITHFULNESS BELOW THRESHOLD</span>`;
+
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-brand-400">Attempt #${att.attempt}</span>
+              ${statusBadge}
+            </div>
+            <span class="font-mono text-xs text-slate-400 font-semibold">Faithfulness Score: ${(att.faithfulness_score * 100).toFixed(0)}%</span>
+          </div>
+          <div class="text-xs text-slate-300 font-mono bg-slate-950/50 p-2 rounded border border-slate-800/80">
+            <span class="text-slate-500 font-sans font-semibold">Query used:</span> "${att.query}"
+          </div>
+          <div class="text-xs text-slate-300 font-sans leading-relaxed">
+            <span class="text-slate-400 font-semibold">Generated Answer:</span> ${att.answer}
+          </div>
+        `;
+        attemptsContainer.appendChild(div);
+      });
+
+      // Contexts
+      const contextsContainer = document.getElementById('contexts-container');
+      contextsContainer.innerHTML = '';
+
+      if (!data.contexts || data.contexts.length === 0) {
+        contextsContainer.innerHTML = `<div class="text-xs text-slate-500 italic">No context retrieved.</div>`;
+      } else {
+        data.contexts.forEach((ctx, idx) => {
+          const cDiv = document.createElement('div');
+          cDiv.className = 'bg-slate-950/70 border border-slate-800/80 rounded-xl p-3 text-xs text-slate-300 font-mono leading-relaxed';
+          cDiv.innerHTML = `<span class="text-brand-400 font-bold mr-2">[Source #${idx + 1}]</span>${ctx}`;
+          contextsContainer.appendChild(cDiv);
+        });
+      }
+    }
+
+    async function handleFileUploadSubmit(event) {
+      event.preventDefault();
+      const fileInput = document.getElementById('upload-file-input');
+      const docIdInput = document.getElementById('upload-doc-id');
+      if (!fileInput.files || fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      if (docIdInput.value.trim()) {
+        formData.append('document_id', docIdInput.value.trim());
+      }
+
+      const btn = document.getElementById('btn-upload-file');
+      btn.disabled = true;
+      btn.innerText = 'Extracting & Vectorizing File...';
+
+      try {
+        const res = await fetch(`${API_BASE}/ingest/file`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          alert(`Success! File '${file.name}' ingested as '${data.document_id}' (${data.chunks_processed} chunks indexed).`);
+          fileInput.value = '';
+          docIdInput.value = '';
+          loadDocuments();
+          fetchMetrics();
+        } else {
+          const err = await res.json();
+          alert('File upload failed: ' + (err.detail || 'Server error'));
+        }
+      } catch (e) {
+        alert('File upload request error: ' + e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg> Upload & Vectorize File`;
+      }
+    }
+
+    async function handleIngestSubmit(event) {
+      event.preventDefault();
+      const docId = document.getElementById('ingest-doc-id').value.trim();
+      const content = document.getElementById('ingest-content').value.trim();
+      if (!docId || !content) return;
+
+      const btn = document.getElementById('btn-ingest-doc');
+      btn.disabled = true;
+      btn.innerText = 'Ingesting Text...';
+
+      try {
+        const res = await fetch(`${API_BASE}/ingest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ document_id: docId, content: content })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          alert(`Success! Ingested document '${data.document_id}' (${data.chunks_processed} vector chunks indexed).`);
+          document.getElementById('ingest-doc-id').value = '';
+          document.getElementById('ingest-content').value = '';
+          loadDocuments();
+          fetchMetrics();
+        } else {
+          const err = await res.json();
+          alert('Ingestion failed: ' + (err.detail || 'Server error'));
+        }
+      } catch (e) {
+        alert('Ingest request error: ' + e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg> Ingest Text Content`;
+      }
+    }
+
+    // Initial Load
+    fetchHealth();
+    fetchMetrics();
+    loadDocuments();
+  </script>
+</body>
+</html>
