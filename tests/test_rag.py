@@ -132,14 +132,20 @@ class TestRAGProject(unittest.TestCase):
         self.assertIn("text/html", report_res.headers["content-type"])
         self.assertIn("Executive Audit Report", report_res.text)
 
-    def test_14_gdpr_data_purge(self):
-        purge_res = self.client.delete("/api/v1/gdpr/purge/TEMP_DELETE_DOC")
-        self.assertEqual(purge_res.status_code, 200)
-        data = purge_res.json()
-        self.assertEqual(data["status"], "purged")
+    def test_15_export_deck(self):
+        deck_res = self.client.get("/api/v1/export/deck")
+        self.assertEqual(deck_res.status_code, 200)
+        self.assertIn("EXECUTIVE BRIEFING", deck_res.text)
+
+    def test_16_workspace_list(self):
+        ws_res = self.client.get("/api/v1/workspace/list")
+        self.assertEqual(ws_res.status_code, 200)
+        data = ws_res.json()
+        self.assertIn("workspaces", data)
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 

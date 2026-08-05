@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: industrial-rag-rollout
+spec:
+  replicas: 5
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 10m}
+      - setWeight: 50
+      - pause: {duration: 10m}
+  selector:
+    matchLabels:
+      app: rag-project
+  template:
+    metadata:
+      labels:
+        app: rag-project
+    spec:
+      containers:
+      - name: rag-container
+        image: rag-project:v5.0.0
+        ports:
+        - containerPort: 8000

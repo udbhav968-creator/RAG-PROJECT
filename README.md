@@ -1,4 +1,4 @@
-# ⚡ Industrial RAG Engine Tier-1 Fortune 500 Enterprise Suite
+# ⚡ Industrial RAG Engine v5.0 Next-Generation Enterprise Suite
 
 [![Build Status](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=githubactions)](https://github.com/udbhav968-creator/RAG-PROJECT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -6,18 +6,18 @@
 [![Pinecone](https://img.shields.io/badge/Pinecone-v3.0+-000000?style=for-the-badge&logo=pinecone)](https://pinecone.io)
 [![Redis](https://img.shields.io/badge/Redis-v7.0-DC382D?style=for-the-badge&logo=redis)](https://redis.io)
 [![Terraform](https://img.shields.io/badge/Terraform-AWS%2FEKS-7B42BC?style=for-the-badge&logo=terraform)](https://terraform.io)
-[![Helm](https://img.shields.io/badge/Helm-v4.0-0F1689?style=for-the-badge&logo=helm)](https://helm.sh)
+[![ArgoCD](https://img.shields.io/badge/ArgoCD-Canary%20Rollouts-EF7B4D?style=for-the-badge&logo=argo)](https://argoproj.github.io)
 
-Fortune 500 Enterprise **Retrieval-Augmented Generation (RAG)** platform featuring **Multi-LLM Circuit Breakers & Automatic Failover**, **OpenTelemetry Distributed Tracing**, **Executive HTML/PDF Audit Report Exporters**, **GDPR Right-to-be-Forgotten Data Purge Engine**, **Terraform AWS EKS Infrastructure as Code**, **HyDE Hypothetical Document Embeddings**, **Sub-Millisecond Semantic Vector Caching**, **Voice Query Speech Recognition**, and **GitHub Actions CI/CD**.
+Industrial-grade **Retrieval-Augmented Generation (RAG)** platform featuring **Cross-Encoder Re-Ranking**, **Python Code Execution Sandbox**, **Self-Reflective RAG (Self-RAG)**, **Real-Time Token Cost Metering**, **Multi-Modal STT Media Indexing**, **PDF Table OCR**, **ML Prompt Injection Classifier**, **ColBERT Late Interaction**, **PowerPoint (.pptx) Deck Exporter**, **Collaborative Workspaces**, **Active-Active Geo-Replication**, and **ArgoCD Canary Rollouts**.
 
 ---
 
 ## 📋 Table of Contents
 
 - [🎯 System Architecture](#-system-architecture)
-- [✨ Tier-1 Enterprise Infrastructure Features](#-tier-1-enterprise-infrastructure-features)
+- [✨ v5.0 Next-Gen Innovations](#-v50-next-gen-innovations)
 - [📁 Complete Directory Structure](#-complete-directory-structure)
-- [🚀 Quick Start & Terraform Infrastructure](#-quick-start--terraform-infrastructure)
+- [🚀 Quick Start & Deployment](#-quick-start--deployment)
 - [🧪 Automated Testing & Verification](#-automated-testing--verification)
 - [📄 License & Author](#-license--author)
 
@@ -27,43 +27,49 @@ Fortune 500 Enterprise **Retrieval-Augmented Generation (RAG)** platform featuri
 
 ```mermaid
 flowchart TD
-    User([User / Web Dashboard / API Client]) -->|HTTP Request| Tracing[OpenTelemetry Distributed Tracer]
-    Tracing --> CircuitBreaker{Multi-LLM Circuit Breaker}
+    User([User / Web Dashboard / API]) --> MLClassifier[ML Prompt Injection Classifier]
+    MLClassifier --> SelfRAG{Self-Reflective RAG Evaluator}
     
-    CircuitBreaker -- Primary LLM Active --> Primary[OpenAI / Azure LLM Provider]
-    CircuitBreaker -- API Rate Limit / Failure --> Failover[Anthropic Claude-3 / Local Fallback]
+    SelfRAG -->|Needs Retrieval| HybridSearch[BM25 + Dense Vector Hybrid Search]
+    SelfRAG -->|Direct Reply| FastReply[Direct Conversational Generator]
     
-    Primary --> RAGPipeline[World-Class RAG v4.0 Pipeline]
-    Failover --> RAGPipeline
+    HybridSearch --> ReRanker[Cross-Encoder Re-Ranking Engine]
+    ReRanker --> ColBERT[ColBERT Late Interaction Matrix Scorer]
     
-    subgraph Enterprise Infrastructure
-        RAGPipeline --> GDPR[GDPR Compliance Data Purge Engine]
-        RAGPipeline --> ReportGen[Executive HTML/PDF Report Exporter]
-        RAGPipeline --> Telemetry[Prometheus Metrics & OpenTelemetry]
-    end
+    ColBERT --> Generator[LLM Generator / Model Selector]
     
-    GDPR --> VectorStore[(Pinecone v3 / VectorStore)]
-    ReportGen --> User
+    Generator --> CostMeter[Real-Time Token & Cost Metering Engine]
+    CostMeter --> DeckExporter[PowerPoint Deck & HTML Exporter]
+    DeckExporter --> User
 ```
 
 ---
 
-## ✨ Tier-1 Enterprise Infrastructure Features
+## ✨ v5.0 Next-Gen Innovations
 
-1. ⚡ **Multi-LLM Circuit Breaker & Automatic Failover** (`app/core/circuit_breaker.py`):
-   - Monitors primary API failure rates and automatically routes requests to Anthropic Claude-3 or offline fallback generators when rate limits occur.
+1. 🎯 **Cross-Encoder Re-Ranking** (`app/core/reranker.py`):
+   - Re-ranks candidate contexts via cross-entropy relevance scoring for optimal precision.
 
-2. 📊 **OpenTelemetry Distributed Tracing** (`app/telemetry/tracing.py`):
-   - Measures exact microsecond execution spans across request lifecycle: `Cache ➔ Vector Search ➔ LLM ➔ Faithfulness Evaluator`.
+2. 📊 **Python Code & Data Sandbox** (`app/core/code_sandbox.py`):
+   - Executes mathematical, statistical, sum/average queries in an isolated execution environment.
 
-3. 📄 **Executive HTML Audit Report Exporter** (`GET /api/v1/report/html`):
-   - Compiles formatted executive summary audit reports with RAG Triad scores & grounded citations.
+3. 🔄 **Self-Reflective RAG (Self-RAG)** (`app/core/self_rag.py`):
+   - Dynamically evaluates reflection tags (`[Retrieve]`, `[NoRetrieve]`) to prevent unnecessary LLM invocations.
 
-4. 🛡️ **GDPR Data Compliance Purge Engine** (`DELETE /api/v1/gdpr/purge/{doc_id}`):
-   - Atomically purges document vectors, graph nodes, and audit cache logs for right-to-be-forgotten compliance.
+4. 💰 **Real-Time Token & Cost Metering** (`app/core/cost_meter.py`):
+   - Calculates prompt/completion token spend ($ / 1k tokens) per model in real-time.
 
-5. 🏗️ **Terraform AWS EKS Infrastructure as Code** (`deploy/terraform/`):
-   - Cloud IaC manifests (`main.tf`, `variables.tf`) for 1-click provisioning of AWS EKS Kubernetes clusters and ElastiCache Redis.
+5. 🎥 **Multi-Modal Media Indexer** (`app/core/multimodal.py`):
+   - STT transcript parsing for MP4/WAV video and audio files.
+
+6. 📐 **PDF Table OCR Engine** (`app/core/table_ocr.py`):
+   - Reconstructs PDF tables into queryable Markdown schemas.
+
+7. 📊 **PowerPoint (.pptx) Executive Deck Exporter** (`GET /api/v1/export/deck`):
+   - Export research findings into executive briefing slides.
+
+8. 🚀 **ArgoCD Canary Rollouts** (`deploy/argo/rollout.yaml`):
+   - Zero-downtime progressive deployment strategy.
 
 ---
 
@@ -71,66 +77,40 @@ flowchart TD
 
 ```text
 RAG-PROJECT/
-├── .github/
-│   ├── ISSUE_TEMPLATE/             # Bug Report & Feature Request templates
-│   ├── PULL_REQUEST_TEMPLATE.md    # PR checklist
-│   └── workflows/
-│       └── ci.yml                  # GitHub Actions CI/CD workflow
+├── .github/                        # CI/CD & Issue templates
 ├── app/
 │   ├── api/
 │   │   └── v1/
 │   │       └── endpoints/
-│   │           ├── audit.py        # CSV audit export endpoint
-│   │           ├── gdpr.py         # GDPR data purge endpoint
-│   │           ├── graph.py        # Knowledge Graph API endpoint
-│   │           ├── ingest.py       # File (.pdf, .docx, .txt) ingestion API
-│   │           ├── query.py        # Standard & SSE streaming query API
-│   │           └── report.py       # Executive HTML report endpoint
-│   ├── cache/
-│   │   ├── redis_client.py         # Redis cache manager
-│   │   └── semantic_cache.py       # Sub-ms Semantic Vector Cache
-│   ├── core/
-│   │   ├── circuit_breaker.py      # Multi-LLM Circuit Breaker
-│   │   ├── correction.py           # Self-Correction loop
-│   │   ├── evaluator.py            # RAG Triad Evaluator
-│   │   ├── generation.py           # LLM answer generator
-│   │   ├── gdpr.py                 # GDPR data compliance purge engine
-│   │   ├── graph_rag.py            # Knowledge Graph engine
-│   │   ├── guardrails.py           # Guardrails AI PII & Injection shield
-│   │   ├── hyde.py                 # HyDE retriever engine
-│   │   ├── parent_child.py         # Parent-Child auto-merging engine
-│   │   ├── raptor.py               # RAPTOR tree summarizer
-│   │   ├── report_generator.py     # Executive HTML report compiler
-│   │   ├── rag_pipeline.py         # RAG Pipeline orchestrator
-│   │   ├── retrieval.py            # Pinecone & BM25 hybrid search
-│   │   ├── router.py               # Agentic router
-│   │   ├── security.py             # Multi-tenant RBAC security
-│   │   └── self_query.py           # Self-querying filter engine
-│   ├── static/
-│   │   └── index.html              # Web Dashboard with Voice & Graph Canvas
-│   ├── telemetry/
-│   │   └── tracing.py              # OpenTelemetry span tracer
-│   └── main.py                     # FastAPI application entrypoint
+│   │           ├── audit.py        # Audit export
+│   │           ├── export_deck.py  # PowerPoint deck export
+│   │           ├── gdpr.py         # GDPR purge
+│   │           ├── graph.py        # Graph API
+│   │           ├── ingest.py       # File ingestion
+│   │           ├── query.py        # Query API
+│   │           ├── report.py       # HTML report
+│   │           └── workspace.py    # Collaborative workspaces
+│   ├── cache/                      # Redis & Semantic cache
+│   ├── core/                       # 16 Core RAG & Security engines
+│   ├── static/                     # Web Dashboard
+│   └── main.py                     # Entrypoint
 ├── deploy/
-│   ├── helm/                       # Kubernetes Helm Chart
-│   └── terraform/                  # Terraform IaC for AWS EKS & Redis
-├── docs/                           # 15 Real documentation specifications
-├── scripts/                        # Benchmarks & Synthetic Evaluation generators
-├── tests/
-│   └── test_rag.py                 # Automated unit test suite (100% Pass)
-├── CONTRIBUTING.md                 # Open-source contributing guidelines
-├── LICENSE                         # MIT License
+│   ├── argo/                       # ArgoCD Canary Rollout
+│   ├── helm/                       # Helm Chart
+│   └── terraform/                  # Terraform IaC
+├── docs/                           # 15 Real documentation files
+├── scripts/                        # Benchmarks & Synthetic evals
+├── tests/                          # Test suite (100% Pass)
 └── requirements.txt                # Dependencies
 ```
 
 ---
 
-## 🚀 Quick Start & Terraform Infrastructure
+## 🚀 Quick Start & Deployment
 
 ```bash
-# Provision Cloud Infrastructure
-cd deploy/terraform
-terraform init && terraform apply
+# ArgoCD Canary Rollout
+kubectl apply -f deploy/argo/rollout.yaml
 
 # Run Local Development Server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -144,7 +124,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 python -m unittest tests/test_rag.py -v
 ```
 
-All 14 unit tests pass 100%.
+All unit tests pass 100%.
 
 ---
 

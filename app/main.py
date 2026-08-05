@@ -54,7 +54,7 @@ async def startup_event():
         rag_pipeline.ingest_document_text("ARCHITECTURE_GUIDE_002", sample_doc_2)
         logger.info("Seed documents ingested successfully.")
 
-from app.api.v1.endpoints import query, ingest, audit, graph, report, gdpr
+from app.api.v1.endpoints import query, ingest, audit, graph, report, gdpr, export_deck, workspace
 
 # Mount API Routers
 app.include_router(query.router, prefix="/api/v1", tags=["query"])
@@ -63,6 +63,9 @@ app.include_router(audit.router, prefix="/api/v1", tags=["audit"])
 app.include_router(graph.router, prefix="/api/v1", tags=["graph"])
 app.include_router(report.router, prefix="/api/v1", tags=["report"])
 app.include_router(gdpr.router, prefix="/api/v1", tags=["gdpr"])
+app.include_router(export_deck.router, prefix="/api/v1", tags=["export"])
+app.include_router(workspace.router, prefix="/api/v1", tags=["workspace"])
+
 
 
 @app.get("/health", response_model=HealthResponse, tags=["monitoring"])
