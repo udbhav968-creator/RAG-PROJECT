@@ -199,10 +199,15 @@
       <!-- Search Form -->
       <form id="query-form" onsubmit="handleQuerySubmit(event)" class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
-          <input type="text" id="query-input" required placeholder="Ask any question grounded in the ingested knowledge base..." class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-4 py-3.5 pl-11 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-inner">
+          <input type="text" id="query-input" required placeholder="Ask any question grounded in the ingested knowledge base..." class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-4 py-3.5 pl-11 pr-12 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-inner">
           <svg class="w-5 h-5 text-slate-500 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
+          <button type="button" onclick="startVoiceInput()" title="Voice Input" class="absolute right-3 top-3 text-slate-400 hover:text-brand-400 p-1 rounded-lg hover:bg-slate-800 transition">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 016 0v6a3 3 0 01-3 3z" />
+            </svg>
+          </button>
         </div>
         <button type="submit" id="btn-submit-query" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-medium text-sm transition shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 shrink-0">
           <span>Run RAG Pipeline</span>
@@ -211,6 +216,7 @@
           </svg>
         </button>
       </form>
+
 
       <!-- QUERY RESULTS PANEL -->
       <div id="query-result-panel" class="hidden space-y-6 pt-4 border-t border-slate-800">
@@ -819,6 +825,30 @@
       }
     }
 
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Web Speech API is not supported in this browser. Please use Chrome or Edge.');
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      const input = document.getElementById('query-input');
+      input.placeholder = 'Listening to your voice query...';
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        input.value = transcript;
+        input.placeholder = 'Ask any question grounded in the ingested knowledge base...';
+      };
+
+      recognition.onerror = function() {
+        input.placeholder = 'Voice input error. Please try again.';
+      };
+    }
+
     // Initial Load
     fetchMetrics();
     loadDocuments();
@@ -826,3 +856,4 @@
   </script>
 </body>
 </html>
+

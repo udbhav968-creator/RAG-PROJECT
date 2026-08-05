@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rag-project
+description: Enterprise Helm Chart for Industrial RAG v4.0 Ultimate Platform
+type: application
+version: 4.0.0
+appVersion: "4.0.0"
