@@ -1,4 +1,4 @@
-# ⚡ Industrial RAG Engine v2.5 Enterprise Suite
+# ⚡ Industrial RAG Engine v3.0 World-Class Enterprise Suite
 
 [![Build Status](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=githubactions)](https://github.com/udbhav968-creator/RAG-PROJECT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -8,21 +8,19 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployed-326CE5?style=for-the-badge&logo=kubernetes)](https://kubernetes.io)
 
-Industrial-grade **Retrieval-Augmented Generation (RAG)** platform equipped with **RAG Triad Metrics Evaluation** (Faithfulness, Answer Relevance, Context Precision, Context Recall), **GraphRAG Entity-Relation Search**, **Agentic Query Routing**, **Real-Time SSE Streaming**, **BM25 + Dense Vector Hybrid Search with Reciprocal Rank Fusion (RRF)**, PDF / DOCX / TXT file ingestion, GitHub Actions CI/CD, structured citations, and CSV audit compliance export.
+Top 0.1% World-Class **Retrieval-Augmented Generation (RAG)** platform equipped with **Multi-Tenant RBAC & Row-Level Security (RLS)**, **Guardrails AI PII Redaction & Prompt Injection Shield**, **RAPTOR Tree Summarization Indexing**, **Parent-Child Auto-Merging Retrieval**, **Interactive Knowledge Graph Canvas API**, **Self-Querying Metadata Filtering**, **RAG Triad Metrics Evaluation**, **Real-Time SSE Token Streaming**, and **GitHub Actions CI/CD**.
 
 ---
 
 ## 📋 Table of Contents
 
 - [🎯 System Architecture](#-system-architecture)
-- [✨ v2.5 Enterprise Capabilities](#-v25-enterprise-capabilities)
-- [📐 RAG Triad Evaluation Formulas](#-rag-triad-evaluation-formulas)
-- [🔍 Hybrid Search & GraphRAG](#-hybrid-search--graphrag)
-- [📁 Project Directory Structure](#-project-directory-structure)
+- [✨ World-Class v3.0 Features](#-world-class-v30-features)
+- [📐 RAG Triad & RAPTOR Formulas](#-rag-triad--raptor-formulas)
+- [📁 Complete Directory Structure](#-complete-directory-structure)
 - [🚀 Quick Start & Local Setup](#-quick-start--local-setup)
-- [🖥️ Interactive Web Dashboard](#️-interactive-web-dashboard)
+- [🖥️ Interactive Web Dashboard & Graph Canvas](#️-interactive-web-dashboard--graph-canvas)
 - [📖 Complete REST API Specification](#-complete-rest-api-specification)
-- [🐳 Docker & Kubernetes Deployment](#-docker--kubernetes-deployment)
 - [🧪 Automated Testing & Verification](#-automated-testing--verification)
 - [📄 License & Author](#-license--author)
 
@@ -32,67 +30,59 @@ Industrial-grade **Retrieval-Augmented Generation (RAG)** platform equipped with
 
 ```mermaid
 flowchart TD
-    User([User / Web Dashboard / API Client]) -->|POST /api/v1/query/stream| API[FastAPI Gateway]
+    User([User / Web Dashboard / API Client]) -->|POST /api/v1/query/stream| Guardrails[Guardrails AI & Injection Shield]
     
-    API --> AgentRouter{Agentic Query Router}
+    Guardrails -- Blocked Injection --> BlockResp[Return Security Blocked Result]
+    Guardrails -- Sanitized Prompt --> Security[Multi-Tenant RBAC Security RLS]
     
-    AgentRouter -->|Vector Search| HybridSearch[Hybrid Search: Dense Vector + BM25 via RRF]
-    AgentRouter -->|Relational Query| GraphRAG[GraphRAG Entity-Relation Graph]
+    Security --> SelfQuery[Self-Querying Metadata Parser]
+    SelfQuery --> AgentRouter{Agentic Query Router}
     
-    subgraph Core RAG Engine
-        HybridSearch --> VectorDB[(Pinecone v3 / In-Memory Store)]
-        GraphRAG --> GraphEngine[(Knowledge Graph Storage)]
+    AgentRouter -->|Vector Search| ParentChild[Parent-Child Auto-Merging Retriever]
+    AgentRouter -->|High-Level Summary| RAPTOR[RAPTOR Recursive Tree Indexer]
+    AgentRouter -->|Relational Query| GraphRAG[GraphRAG Knowledge Graph Search]
+    
+    subgraph Core Engine
+        ParentChild --> VectorDB[(Pinecone v3 / In-Memory Store)]
+        RAPTOR --> RaptorStore[(RAPTOR Tree Levels)]
+        GraphRAG --> GraphStore[(Knowledge Graph Store)]
         
-        VectorDB -->|Retrieved Contexts & Citations| Generator[LLM Generator / Model Selector]
-        GraphEngine -->|Multi-Hop Graph Contexts| Generator
+        VectorDB --> Generator[LLM Generator / Model Selector]
+        RaptorStore --> Generator
+        GraphStore --> Generator
         
-        Generator -->|Candidate Answer| Evaluator[RAG Triad & Self-Correction Evaluator]
+        Generator --> Evaluator[RAG Triad Evaluator & Self-Correction]
     end
     
-    Evaluator -->|Triad Metrics + SSE Stream| API
-    API -->|Real-Time Token Stream| User
+    Evaluator -->|Triad Metrics + SSE Stream| API[FastAPI Response Gateway]
+    API --> User
 ```
 
 ---
 
-## ✨ v2.5 Enterprise Capabilities
+## ✨ World-Class v3.0 Features
 
-1. 📐 **RAG Triad Metrics Evaluation**:
-   - Calculates 4 core metrics for every query response: **Faithfulness**, **Answer Relevance**, **Context Precision**, and **Context Recall**.
+1. 🔒 **Multi-Tenant RBAC & Row-Level Security (RLS)**:
+   - Enforces Role-Based Access Control (`admin`, `engineering`, `finance`, `public`) ensuring vectors are isolated per tenant token.
 
-2. 🌐 **GraphRAG Entity-Relation Search**:
-   - Extracts entities (*Systems*, *Components*, *Metrics*) and relations (*DEPENDS_ON*, *REGULATES*, *TRIGGERS*) from ingested documents for multi-hop graph retrieval.
+2. 🛡️ **Guardrails AI PII Redaction & Prompt Injection Shield**:
+   - Scans input prompts and output responses to automatically redact SSNs, credit cards, emails, and API keys while blocking injection attacks.
 
-3. 🔀 **Agentic Query Router**:
-   - Dynamically routes query prompts to Vector Search, GraphRAG Search, or Code Execution based on intent classification.
+3. 🌳 **RAPTOR Hierarchical Tree Indexing**:
+   - Builds multi-level summary trees (Level 0: chunks, Level 1: section summaries, Level 2: document themes) for high-level thematic queries.
 
-4. ⚡ **Real-Time Server-Sent Events (SSE) Streaming**:
-   - Streams LLM generated tokens in real-time (`POST /api/v1/query/stream`) with word-by-word typewriter effect.
+4. 🧩 **Parent-Child Chunking & Auto-Merging Retrieval**:
+   - Matches small 150-word child chunks for high precision, while automatically retrieving 1,000-word parent sections for context generation.
 
-5. 🔍 **Hybrid BM25 Keyword + Dense Vector Search**:
-   - Merges sparse term frequency (BM25) with dense semantic embeddings via **Reciprocal Rank Fusion (RRF)**.
+5. 🕸️ **Interactive Knowledge Graph Canvas Visualizer**:
+   - Renders a visual node-edge network graph (`GET /api/v1/graph/data`) on the Web Dashboard using HTML5 Canvas.
 
-6. 📁 **PDF / DOCX / TXT Direct File Ingestion**:
-   - Upload `.pdf`, `.docx`, and `.txt` files directly via `POST /api/v1/ingest/file`.
-
-7. 🔄 **GitHub Actions CI/CD Pipeline**:
-   - Automated test suite execution on Python 3.10 & 3.11 with Docker build verification.
+6. 🔍 **Self-Querying Metadata Filter Parser**:
+   - Automatically extracts dates, departments, and document types from natural language user prompts.
 
 ---
 
-## 📐 RAG Triad Evaluation Formulas
-
-$$\text{Faithfulness} = \frac{|\text{Supported Sentences in Answer}|}{|\text{Total Sentences in Answer}|} \in [0.0, 1.0]$$
-
-$$\text{Answer Relevance} = \text{CosineSimilarity}(\mathbf{E}_{\text{question}}, \mathbf{E}_{\text{answer}}) \times \text{LengthPenalty} \in [0.0, 1.0]$$
-
-$$\text{Context Precision} = \frac{\sum_{k=1}^K P@k \cdot \text{rel}(k)}{|\text{Relevant Chunks}|} \in [0.0, 1.0]$$
-
-$$\text{Context Recall} = \frac{|\text{Key Query Terms in Retrieved Contexts}|}{|\text{Total Key Query Terms}|} \in [0.0, 1.0]$$
-
----
-
-## 📁 Project Directory Structure
+## 📁 Complete Directory Structure
 
 ```text
 RAG-PROJECT/
@@ -104,6 +94,7 @@ RAG-PROJECT/
 │   │   └── v1/
 │   │       └── endpoints/
 │   │           ├── audit.py        # CSV audit export endpoint
+│   │           ├── graph.py        # Knowledge Graph Data API endpoint
 │   │           ├── ingest.py       # PDF/DOCX/TXT file ingestion API
 │   │           └── query.py        # Standard & SSE streaming query API
 │   ├── core/
@@ -111,17 +102,22 @@ RAG-PROJECT/
 │   │   ├── evaluator.py            # RAG Triad Evaluator (Precision, Recall, Relevance)
 │   │   ├── generation.py           # LLM answer generator with fallback
 │   │   ├── graph_rag.py            # Knowledge Graph Entity-Relation Engine
-│   │   ├── rag_pipeline.py         # RAG pipeline orchestrator
+│   │   ├── guardrails.py           # Guardrails AI PII Redaction & Injection Shield
+│   │   ├── parent_child.py         # Parent-Child Auto-Merging Engine
+│   │   ├── raptor.py               # RAPTOR Recursive Tree Summarizer
+│   │   ├── rag_pipeline.py         # World-Class RAG Pipeline Orchestrator
 │   │   ├── retrieval.py            # Pinecone v3 & Hybrid BM25/Vector RRF search
-│   │   └── router.py               # Agentic Query Router
+│   │   ├── router.py               # Agentic Query Router
+│   │   ├── security.py             # Multi-Tenant RBAC & RLS Security
+│   │   └── self_query.py           # Self-Querying Metadata Parser
 │   ├── static/
-│   │   └── index.html              # Web Dashboard UI with RAG Triad & Streaming
+│   │   └── index.html              # Web Dashboard with Interactive Graph Canvas
 │   ├── utils/
 │   │   └── metrics.py              # Telemetry & CSV audit recorder
 │   └── main.py                     # FastAPI application entrypoint
 ├── scripts/
-│   ├── benchmark_rag.py            # Pipeline throughput profiler
-│   └── benchmark_triad.py          # RAG Triad evaluation benchmark suite
+│   ├── benchmark_triad.py          # RAG Triad evaluation benchmark
+│   └── benchmark_worldclass.py     # World-Class architectural profiler
 ├── tests/
 │   └── test_rag.py                 # Automated unit test suite (100% Pass)
 └── requirements.txt                # Dependencies
@@ -135,23 +131,9 @@ RAG-PROJECT/
 # Install dependencies
 pip install -r requirements.txt
 
-# Run server
+# Run application server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-
----
-
-## 📖 Complete REST API Specification
-
-### 1. Real-Time Token Streaming (SSE)
-`POST /api/v1/query/stream`
-
-Returns Server-Sent Events stream (`text/event-stream`).
-
-### 2. Execute RAG Query with Triad Metrics
-`POST /api/v1/query`
-
-Returns final answer, triad scores, citations, and attempt breakdown.
 
 ---
 
@@ -161,7 +143,7 @@ Returns final answer, triad scores, citations, and attempt breakdown.
 python -m unittest tests/test_rag.py -v
 ```
 
-All 10 unit tests pass 100%.
+All 12 unit tests pass 100%.
 
 ---
 

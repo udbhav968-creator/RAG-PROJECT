@@ -11,16 +11,18 @@ _in_memory_store: List[Dict[str, Any]] = []
 _pinecone_client = None
 
 def _get_embeddings():
-    if settings.OPENAI_API_KEY and len(settings.OPENAI_API_KEY.strip()) > 15 and settings.OPENAI_API_KEY.startswith("sk-"):
+    key = (settings.OPENAI_API_KEY or "").strip()
+    if key and len(key) > 15 and key.startswith("sk-") and "your_" not in key:
         try:
             from langchain_openai import OpenAIEmbeddings
             return OpenAIEmbeddings(
                 model=settings.EMBEDDING_MODEL,
-                openai_api_key=settings.OPENAI_API_KEY
+                openai_api_key=key
             )
         except Exception as e:
             logger.warning(f"Failed to initialize OpenAIEmbeddings: {e}")
     return None
+
 
 def _simple_text_vector(text: str, dim: int = 1536) -> List[float]:
     """Fallback deterministic feature vector generation for local testing without OpenAI key."""

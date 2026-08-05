@@ -6,17 +6,19 @@ logger = logging.getLogger(__name__)
 
 def _get_llm(model_name: str = None):
     target_model = model_name or settings.MODEL_NAME
-    if settings.OPENAI_API_KEY and len(settings.OPENAI_API_KEY.strip()) > 15 and settings.OPENAI_API_KEY.startswith("sk-"):
+    key = (settings.OPENAI_API_KEY or "").strip()
+    if key and len(key) > 15 and key.startswith("sk-") and "your_" not in key:
         try:
             from langchain_openai import ChatOpenAI
             return ChatOpenAI(
                 model=target_model,
-                openai_api_key=settings.OPENAI_API_KEY,
+                openai_api_key=key,
                 temperature=0.2
             )
         except Exception as e:
             logger.warning(f"Failed to initialize ChatOpenAI ({target_model}): {e}")
     return None
+
 
 def generate_answer(question: str, contexts: List[str], model_name: str = None) -> str:
     if not contexts:
