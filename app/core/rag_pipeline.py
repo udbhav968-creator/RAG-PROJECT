@@ -34,6 +34,9 @@ def _split_text_chunks(text: str, chunk_size: int = 500, chunk_overlap: int = 50
             return chunks if chunks else [text]
 
 from app.core.retrieval import retrieve, retrieve_with_citations, embed_texts, upsert_vectors
+from app.core.evaluator import triad_evaluator
+from app.core.graph_rag import graph_engine
+from app.core.router import agent_router
 
 class RAGPipeline:
     def __init__(self):
@@ -43,6 +46,10 @@ class RAGPipeline:
         if max_attempts is None:
             max_attempts = settings.MAX_CORRECTION_ATTEMPTS
         target_model = model_name or settings.MODEL_NAME
+
+        # Route query via Agentic Router
+        route_info = agent_router.route_query(question)
+        selected_tool = route_info["selected_tool"]
 
         # Check Cache
         cached = get_cached_answer_sync(question)
@@ -58,19 +65,32 @@ class RAGPipeline:
             )
             cached["question"] = question
             cached["audit_id"] = audit_id
+            cached["selected_tool"] = selected_tool
             return cached
 
         # Step 1: Initial Hybrid Retrieval with Structured Citations
         citation_items = retrieve_with_citations(question, k=settings.TOP_K_RETRIEVAL)
         contexts = [c["text"] for c in citation_items]
-        
+
+        # GraphRAG multi-hop relational retrieval boost if selected
+        if selected_tool == "graph_rag":
+            graph_edges = graph_engine.graph_search(question)
+            if graph_edges:
+                graph_contexts = [f"[Graph Edge: {e['source']} -{e['relation']}-> {e['target']}] {e['evidence']}" for e in graph_edges]
+                contexts = graph_contexts + contexts
+
         # Step 2: Initial Generation
         initial_answer = generate_answer(question, contexts, model_name=target_model)
         
         # Step 3: Faithfulness Evaluation & Iterative Self-Correction
         result = correct_answer(question, contexts, initial_answer, max_attempts)
         result["question"] = question
-        
+        result["selected_tool"] = selected_tool
+
+        # Step 4: RAG Triad Metrics Calculation (Faithfulness, Relevance, Precision, Recall)
+        triad_metrics = triad_evaluator.evaluate_triad(question, contexts, result["final_answer"])
+        result["triad_scores"] = triad_metrics
+
         # Add citations structure
         result["citations"] = [
             {
@@ -103,6 +123,9 @@ class RAGPipeline:
         
         if not chunks:
             chunks = [content]
+
+        # Extract Knowledge Graph entities & relationships
+        graph_engine.extract_and_add(document_id, content)
 
         embeddings = embed_texts(chunks)
         vectors = [

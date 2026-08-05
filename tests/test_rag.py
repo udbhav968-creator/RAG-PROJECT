@@ -93,6 +93,33 @@ class TestRAGProject(unittest.TestCase):
         self.assertIn("text/csv", export_res.headers["content-type"])
         self.assertIn("Audit ID", export_res.text)
 
+    def test_08_rag_triad_evaluation(self):
+        query_res = self.client.post("/api/v1/query", json={"question": "What is the Industrial RAG Engine?"})
+        self.assertEqual(query_res.status_code, 200)
+        data = query_res.json()
+        self.assertIn("triad_scores", data)
+        self.assertIn("faithfulness", data["triad_scores"])
+        self.assertIn("answer_relevance", data["triad_scores"])
+        self.assertIn("context_precision", data["triad_scores"])
+        self.assertIn("context_recall", data["triad_scores"])
+
+    def test_09_graph_rag_entities(self):
+        rag_pipeline.ingest_document_text(
+            "SYSTEM_GRAPH_DOC",
+            "TurbineModule regulates PressureSensor and triggers AlarmSystem when temperature exceeds 850C."
+        )
+        query_res = self.client.post("/api/v1/query", json={"question": "What affects AlarmSystem and PressureSensor?"})
+        self.assertEqual(query_res.status_code, 200)
+        data = query_res.json()
+        self.assertIn("selected_tool", data)
+
+    def test_10_streaming_sse_query(self):
+        response = self.client.post("/api/v1/query/stream", json={"question": "What is Industrial RAG?"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/event-stream", response.headers["content-type"])
+        self.assertIn("data: ", response.text)
+
 if __name__ == '__main__':
     unittest.main()
+
 

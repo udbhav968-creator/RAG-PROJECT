@@ -27,6 +27,9 @@ class QueryResponse(BaseModel):
     attempts: List[CorrectionAttempt]
     success: bool
     audit_id: Optional[str] = None
+    triad_scores: Optional[Dict[str, float]] = None
+    selected_tool: Optional[str] = "hybrid_vector_search"
+
 
 class IngestRequest(BaseModel):
     document_id: str = Field(..., description="Unique identifier for the document")

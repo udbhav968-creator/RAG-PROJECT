@@ -1,4 +1,4 @@
-# ⚡ Industrial RAG Engine with AI Self-Correction & Faithfulness Evaluation
+# ⚡ Industrial RAG Engine v2.5 Enterprise Suite
 
 [![Build Status](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=githubactions)](https://github.com/udbhav968-creator/RAG-PROJECT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -8,117 +8,87 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployed-326CE5?style=for-the-badge&logo=kubernetes)](https://kubernetes.io)
 
-Enterprise-grade **Retrieval-Augmented Generation (RAG)** system equipped with **LLM Faithfulness Evaluation & Multi-Attempt Self-Correction**, **BM25 + Vector Hybrid Search with Reciprocal Rank Fusion (RRF)**, PDF / DOCX / TXT file ingestion, structured source citations, CSV audit log exporter, dual vector database support (Pinecone v3 + In-Memory VectorStore fallback), distributed Celery task queues, Redis multi-tier caching, interactive Web Application Dashboard, and Prometheus metrics telemetry.
+Industrial-grade **Retrieval-Augmented Generation (RAG)** platform equipped with **RAG Triad Metrics Evaluation** (Faithfulness, Answer Relevance, Context Precision, Context Recall), **GraphRAG Entity-Relation Search**, **Agentic Query Routing**, **Real-Time SSE Streaming**, **BM25 + Dense Vector Hybrid Search with Reciprocal Rank Fusion (RRF)**, PDF / DOCX / TXT file ingestion, GitHub Actions CI/CD, structured citations, and CSV audit compliance export.
 
 ---
 
 ## 📋 Table of Contents
 
 - [🎯 System Architecture](#-system-architecture)
-- [✨ Core Enterprise Features](#-core-enterprise-features)
-- [🔍 Hybrid Search & Reciprocal Rank Fusion (RRF)](#-hybrid-search--reciprocal-rank-fusion-rrf)
-- [🔄 Iterative Self-Correction Algorithm](#-iterative-self-correction-algorithm)
+- [✨ v2.5 Enterprise Capabilities](#-v25-enterprise-capabilities)
+- [📐 RAG Triad Evaluation Formulas](#-rag-triad-evaluation-formulas)
+- [🔍 Hybrid Search & GraphRAG](#-hybrid-search--graphrag)
 - [📁 Project Directory Structure](#-project-directory-structure)
 - [🚀 Quick Start & Local Setup](#-quick-start--local-setup)
 - [🖥️ Interactive Web Dashboard](#️-interactive-web-dashboard)
 - [📖 Complete REST API Specification](#-complete-rest-api-specification)
 - [🐳 Docker & Kubernetes Deployment](#-docker--kubernetes-deployment)
 - [🧪 Automated Testing & Verification](#-automated-testing--verification)
-- [📊 Telemetry & System Metrics](#-telemetry--system-metrics)
 - [📄 License & Author](#-license--author)
 
 ---
 
 ## 🎯 System Architecture
 
-The Industrial RAG Engine guarantees high-precision, hallucination-free AI answers by enforcing an automated **Faithfulness Evaluation, Hybrid Search & Query Rephrasing Loop**.
-
 ```mermaid
 flowchart TD
-    User([User / Web Dashboard / API Client]) -->|POST /api/v1/query| API[FastAPI Gateway]
+    User([User / Web Dashboard / API Client]) -->|POST /api/v1/query/stream| API[FastAPI Gateway]
     
-    API --> CacheCheck{Redis / Memory Cache}
-    CacheCheck -- Cache Hit --> CachedResp[Return Cached Result - sub 1ms]
+    API --> AgentRouter{Agentic Query Router}
     
-    CacheCheck -- Cache Miss --> RAGPipeline[RAG Pipeline Engine]
+    AgentRouter -->|Vector Search| HybridSearch[Hybrid Search: Dense Vector + BM25 via RRF]
+    AgentRouter -->|Relational Query| GraphRAG[GraphRAG Entity-Relation Graph]
     
-    subgraph Core RAG Loop
-        RAGPipeline --> HybridSearch[Hybrid Search: Dense Vector + BM25 Keyword via RRF]
-        HybridSearch --> VectorDB[(Pinecone v3 / In-Memory VectorStore)]
-        VectorDB -->|Top-K Grounded Contexts & Citations| Generator[LLM Generator / Model Selector]
-        Generator -->|Generated Candidate Answer| Scorer[Faithfulness Evaluator]
+    subgraph Core RAG Engine
+        HybridSearch --> VectorDB[(Pinecone v3 / In-Memory Store)]
+        GraphRAG --> GraphEngine[(Knowledge Graph Storage)]
         
-        Scorer -->|Faithfulness >= 0.70| SuccessPass[Mark Success & Attach Audit ID]
-        Scorer -->|Faithfulness < 0.70| Rephraser[LLM Query Rephraser]
+        VectorDB -->|Retrieved Contexts & Citations| Generator[LLM Generator / Model Selector]
+        GraphEngine -->|Multi-Hop Graph Contexts| Generator
         
-        Rephraser -->|Attempt #2 Expanded Query| HybridSearch
+        Generator -->|Candidate Answer| Evaluator[RAG Triad & Self-Correction Evaluator]
     end
     
-    SuccessPass --> CacheStore[Set Result in Redis Cache]
-    CacheStore --> AuditRecorder[Record CSV Audit Entry]
-    AuditRecorder --> API
-    API --> User
+    Evaluator -->|Triad Metrics + SSE Stream| API
+    API -->|Real-Time Token Stream| User
 ```
 
 ---
 
-## ✨ Core Enterprise Features
+## ✨ v2.5 Enterprise Capabilities
 
-1. 🤖 **Iterative AI Self-Correction Loop**:
-   - Evaluates every generated answer against the retrieved context snippets.
-   - If the hallucination detector or faithfulness score falls below `0.70`, the system automatically invokes an LLM rephraser to generate a more targeted search query, fetches additional context vectors, and re-generates the answer.
+1. 📐 **RAG Triad Metrics Evaluation**:
+   - Calculates 4 core metrics for every query response: **Faithfulness**, **Answer Relevance**, **Context Precision**, and **Context Recall**.
 
-2. 🔍 **Hybrid BM25 Keyword + Dense Vector Search**:
-   - Merges keyword term-frequency matching (BM25) with dense vector embedding similarity using **Reciprocal Rank Fusion (RRF)**.
-   - Ensures accurate retrieval for technical acronyms, part numbers, and domain-specific terminology.
+2. 🌐 **GraphRAG Entity-Relation Search**:
+   - Extracts entities (*Systems*, *Components*, *Metrics*) and relations (*DEPENDS_ON*, *REGULATES*, *TRIGGERS*) from ingested documents for multi-hop graph retrieval.
 
-3. 📁 **PDF / DOCX / TXT Direct File Ingestion**:
-   - Drag-and-drop or upload `.pdf`, `.docx`, and `.txt` files directly via `POST /api/v1/ingest/file`.
-   - Text is parsed using `pypdf` and `python-docx` with character-slice fallbacks.
+3. 🔀 **Agentic Query Router**:
+   - Dynamically routes query prompts to Vector Search, GraphRAG Search, or Code Execution based on intent classification.
 
-4. 🏷️ **Structured Source Citations & Chunk Attribution**:
-   - Attaches precise citation tags `[DocumentID, Chunk #i]` to every retrieved source context.
+4. ⚡ **Real-Time Server-Sent Events (SSE) Streaming**:
+   - Streams LLM generated tokens in real-time (`POST /api/v1/query/stream`) with word-by-word typewriter effect.
 
-5. 🤖 **Dynamic LLM Model Provider Selector**:
-   - Select dynamically between `gpt-4`, `gpt-3.5-turbo`, or local offline fallback generators via API payload or UI dropdown.
+5. 🔍 **Hybrid BM25 Keyword + Dense Vector Search**:
+   - Merges sparse term frequency (BM25) with dense semantic embeddings via **Reciprocal Rank Fusion (RRF)**.
 
-6. 📊 **CSV Audit Log Exporter**:
-   - Export compliance evaluation reports (`GET /api/v1/audit/export`) containing query logs, faithfulness scores, latency, and attempts history.
+6. 📁 **PDF / DOCX / TXT Direct File Ingestion**:
+   - Upload `.pdf`, `.docx`, and `.txt` files directly via `POST /api/v1/ingest/file`.
 
-7. ⚡ **Dual Vector Database Manager**:
-   - Seamlessly integrates **Pinecone v3 SDK** (`from pinecone import Pinecone`) for cloud vector indexing with an in-memory cosine similarity fallback.
-
-8. 🖥️ **Modern Web Application Dashboard**:
-   - Embedded HTML5 / TailwindCSS / Glassmorphism UI available at `http://localhost:8000/`.
+7. 🔄 **GitHub Actions CI/CD Pipeline**:
+   - Automated test suite execution on Python 3.10 & 3.11 with Docker build verification.
 
 ---
 
-## 🔍 Hybrid Search & Reciprocal Rank Fusion (RRF)
+## 📐 RAG Triad Evaluation Formulas
 
-The retrieval engine combines dense semantic similarity $\mathbf{S}_{\text{vector}}$ and sparse keyword frequency $\mathbf{S}_{\text{BM25}}$:
+$$\text{Faithfulness} = \frac{|\text{Supported Sentences in Answer}|}{|\text{Total Sentences in Answer}|} \in [0.0, 1.0]$$
 
-$$\text{RRF Score}(d) = w_1 \cdot \mathbf{S}_{\text{vector}}(d) + w_2 \cdot \mathbf{S}_{\text{BM25}}(d)$$
+$$\text{Answer Relevance} = \text{CosineSimilarity}(\mathbf{E}_{\text{question}}, \mathbf{E}_{\text{answer}}) \times \text{LengthPenalty} \in [0.0, 1.0]$$
 
-Where $w_1 = 0.65$ (dense semantic vector weight) and $w_2 = 0.35$ (BM25 keyword term frequency weight).
+$$\text{Context Precision} = \frac{\sum_{k=1}^K P@k \cdot \text{rel}(k)}{|\text{Relevant Chunks}|} \in [0.0, 1.0]$$
 
----
-
-## 🔄 Iterative Self-Correction Algorithm
-
-$$\text{Faithfulness Score } (S) = \frac{|\text{Key Claims Supported by Context}|}{|\text{Total Claims in Answer}|} \in [0.0, 1.0]$$
-
-1. **Attempt #1**:
-   - Execute initial hybrid query $\mathbf{Q}_1$.
-   - Retrieve top $K$ document chunks $\mathbf{C}_1$ with citation tags.
-   - Generate initial answer $\mathbf{A}_1$.
-   - Evaluate faithfulness score $S_1$. If $S_1 \ge 0.70$, return $\mathbf{A}_1$ immediately.
-
-2. **Attempt #2..N** (if $S_1 < 0.70$):
-   - Rephrase query $\mathbf{Q}_k = \text{Rephrase}(\mathbf{Q}_{k-1})$.
-   - Retrieve additional context chunks $\mathbf{C}_k$.
-   - Combine contexts $\mathbf{C}_{\text{combined}} = \mathbf{C}_{k-1} \cup \mathbf{C}_k$.
-   - Generate refined answer $\mathbf{A}_k$.
-   - Evaluate score $S_k$. If $S_k \ge 0.70$, return $\mathbf{A}_k$; otherwise, return candidate with maximum faithfulness score.
+$$\text{Context Recall} = \frac{|\text{Key Query Terms in Retrieved Contexts}|}{|\text{Total Key Query Terms}|} \in [0.0, 1.0]$$
 
 ---
 
@@ -126,43 +96,35 @@ $$\text{Faithfulness Score } (S) = \frac{|\text{Key Claims Supported by Context}
 
 ```text
 RAG-PROJECT/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                  # GitHub Actions CI/CD workflow
 ├── app/
 │   ├── api/
 │   │   └── v1/
-│   │       ├── endpoints/
-│   │       │   ├── audit.py        # CSV audit report export endpoints
-│   │       │   ├── ingest.py       # Document & File (.pdf, .docx, .txt) ingestion APIs
-│   │       │   └── query.py        # Query execution & self-correction APIs
-│   │       └── deps.py             # API dependencies
-│   ├── cache/
-│   │   └── redis_client.py         # Dual Redis / In-Memory cache manager
+│   │       └── endpoints/
+│   │           ├── audit.py        # CSV audit export endpoint
+│   │           ├── ingest.py       # PDF/DOCX/TXT file ingestion API
+│   │           └── query.py        # Standard & SSE streaming query API
 │   ├── core/
 │   │   ├── correction.py           # Faithfulness evaluator & query rephraser
+│   │   ├── evaluator.py            # RAG Triad Evaluator (Precision, Recall, Relevance)
 │   │   ├── generation.py           # LLM answer generator with fallback
-│   │   ├── rag_pipeline.py         # End-to-end RAG pipeline orchestrator
-│   │   └── retrieval.py            # Pinecone v3 & Hybrid BM25/Vector RRF search
+│   │   ├── graph_rag.py            # Knowledge Graph Entity-Relation Engine
+│   │   ├── rag_pipeline.py         # RAG pipeline orchestrator
+│   │   ├── retrieval.py            # Pinecone v3 & Hybrid BM25/Vector RRF search
+│   │   └── router.py               # Agentic Query Router
 │   ├── static/
-│   │   └── index.html              # Interactive Web Dashboard UI with File Uploader
+│   │   └── index.html              # Web Dashboard UI with RAG Triad & Streaming
 │   ├── utils/
-│   │   ├── logging.py              # Centralized logging setup
-│   │   └── metrics.py              # System telemetry & CSV audit recorder
-│   ├── workers/
-│   │   ├── celery_app.py           # Celery application & fallback wrapper
-│   │   └── tasks.py                # Async Celery tasks for query & ingestion
-│   ├── config.py                   # Pydantic environment configuration
-│   ├── main.py                     # FastAPI application entrypoint
-│   └── models.py                   # Pydantic API schemas
-├── deploy/
-│   └── kubernetes/                 # K8s manifests (Deployment, Celery, ConfigMap, HPA)
+│   │   └── metrics.py              # Telemetry & CSV audit recorder
+│   └── main.py                     # FastAPI application entrypoint
+├── scripts/
+│   ├── benchmark_rag.py            # Pipeline throughput profiler
+│   └── benchmark_triad.py          # RAG Triad evaluation benchmark suite
 ├── tests/
-│   └── test_rag.py                 # Automated unit & integration test suite
-├── .env.example                    # Environment variables template
-├── docker-compose.yml              # Multi-container orchestrator
-├── Dockerfile                      # FastAPI Web Server image
-├── Dockerfile.worker               # Celery Worker image
-├── vercel.json                     # Vercel deployment configuration
-├── README.md                       # Project documentation
-└── requirements.txt                # Python dependencies
+│   └── test_rag.py                 # Automated unit test suite (100% Pass)
+└── requirements.txt                # Dependencies
 ```
 
 ---
@@ -173,7 +135,7 @@ RAG-PROJECT/
 # Install dependencies
 pip install -r requirements.txt
 
-# Start application
+# Run server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -181,30 +143,15 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## 📖 Complete REST API Specification
 
-### 1. Execute RAG Query
+### 1. Real-Time Token Streaming (SSE)
+`POST /api/v1/query/stream`
+
+Returns Server-Sent Events stream (`text/event-stream`).
+
+### 2. Execute RAG Query with Triad Metrics
 `POST /api/v1/query`
 
-```json
-{
-  "question": "What temperature limit is specified for turbine operation?",
-  "max_attempts": 2,
-  "model_name": "gpt-4"
-}
-```
-
----
-
-### 2. Ingest PDF / DOCX / TXT File
-`POST /api/v1/ingest/file`
-
-Upload file via multipart form data with optional `document_id`.
-
----
-
-### 3. Export CSV Audit Compliance Report
-`GET /api/v1/audit/export`
-
-Downloads `rag_evaluation_audit_report.csv` containing query metrics and faithfulness scores.
+Returns final answer, triad scores, citations, and attempt breakdown.
 
 ---
 
@@ -214,7 +161,7 @@ Downloads `rag_evaluation_audit_report.csv` containing query metrics and faithfu
 python -m unittest tests/test_rag.py -v
 ```
 
-All 7 unit tests pass 100%.
+All 10 unit tests pass 100%.
 
 ---
 
