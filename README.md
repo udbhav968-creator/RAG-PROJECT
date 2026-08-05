@@ -35,8 +35,8 @@ flowchart TD
     Guardrails --> HyDE[HyDE Hypothetical Document Generator]
     HyDE --> SemanticCache{Sub-ms Semantic Vector Cache}
     
-    SemanticCache -- Cache Hit > 0.92 -- > SubMsResp[Return Sub-Millisecond Result]
-    SemanticCache -- Cache Miss -- > Router[Agentic Query Router]
+    SemanticCache -->|Cache Hit Score >= 0.92| SubMsResp[Return Sub-Millisecond Result]
+    SemanticCache -->|Cache Miss| Router[Agentic Query Router]
     
     Router -->|Vector Search| ParentChild[Parent-Child Auto-Merging Retriever]
     Router -->|RAPTOR Summaries| RAPTOR[RAPTOR Recursive Tree Indexer]
@@ -50,6 +50,7 @@ flowchart TD
     TriadEval --> SSEStream[Real-Time SSE Stream Gateway]
     SSEStream --> User
 ```
+
 
 ---
 
