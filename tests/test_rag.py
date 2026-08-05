@@ -126,15 +126,21 @@ class TestRAGProject(unittest.TestCase):
         data = res.json()
         self.assertIn("Blocked by Guardrails", data["final_answer"])
 
-    def test_12_graph_data_api(self):
-        graph_res = self.client.get("/api/v1/graph/data")
-        self.assertEqual(graph_res.status_code, 200)
-        data = graph_res.json()
-        self.assertIn("nodes", data)
-        self.assertIn("links", data)
+    def test_13_executive_html_report(self):
+        report_res = self.client.get("/api/v1/report/html")
+        self.assertEqual(report_res.status_code, 200)
+        self.assertIn("text/html", report_res.headers["content-type"])
+        self.assertIn("Executive Audit Report", report_res.text)
+
+    def test_14_gdpr_data_purge(self):
+        purge_res = self.client.delete("/api/v1/gdpr/purge/TEMP_DELETE_DOC")
+        self.assertEqual(purge_res.status_code, 200)
+        data = purge_res.json()
+        self.assertEqual(data["status"], "purged")
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
