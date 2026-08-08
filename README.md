@@ -1,4 +1,4 @@
-# ⚡ Industrial RAG Engine v5.0 Next-Generation Enterprise Suite
+# ⚡ Industrial RAG Engine Level 6 Apex Enterprise Architecture
 
 [![Build Status](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=githubactions)](https://github.com/udbhav968-creator/RAG-PROJECT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -8,14 +8,14 @@
 [![Terraform](https://img.shields.io/badge/Terraform-AWS%2FEKS-7B42BC?style=for-the-badge&logo=terraform)](https://terraform.io)
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-Canary%20Rollouts-EF7B4D?style=for-the-badge&logo=argo)](https://argoproj.github.io)
 
-Industrial-grade **Retrieval-Augmented Generation (RAG)** platform featuring **Cross-Encoder Re-Ranking**, **Python Code Execution Sandbox**, **Self-Reflective RAG (Self-RAG)**, **Real-Time Token Cost Metering**, **Multi-Modal STT Media Indexing**, **PDF Table OCR**, **ML Prompt Injection Classifier**, **ColBERT Late Interaction**, **PowerPoint (.pptx) Deck Exporter**, **Collaborative Workspaces**, **Active-Active Geo-Replication**, and **ArgoCD Canary Rollouts**.
+Industrial-grade **Retrieval-Augmented Generation (RAG)** platform featuring **Agentic Graph-of-Thought Multi-Hop Reasoning**, **Embedding-Based Dynamic Semantic Chunking**, **NLI Premise-Entailment Hallucination Detector**, **Automated Benchmark Harness & Latency Profiler**, **Real-Time Telemetry API**, **Cross-Encoder Re-Ranking**, **Python Code Execution Sandbox**, **Self-Reflective RAG**, **Real-Time Token Cost Metering**, and **ArgoCD Canary Rollouts**.
 
 ---
 
 ## 📋 Table of Contents
 
-- [🎯 System Architecture](#-system-architecture)
-- [✨ v5.0 Next-Gen Innovations](#-v50-next-gen-innovations)
+- [🎯 Apex System Architecture](#-apex-system-architecture)
+- [🧠 Level 6 Apex Capabilities](#-level-6-apex-capabilities)
 - [📁 Complete Directory Structure](#-complete-directory-structure)
 - [🚀 Quick Start & Deployment](#-quick-start--deployment)
 - [🧪 Automated Testing & Verification](#-automated-testing--verification)
@@ -23,53 +23,44 @@ Industrial-grade **Retrieval-Augmented Generation (RAG)** platform featuring **C
 
 ---
 
-## 🎯 System Architecture
+## 🎯 Apex System Architecture
 
 ```mermaid
 flowchart TD
-    User([User / Web Dashboard / API]) --> MLClassifier[ML Prompt Injection Classifier]
-    MLClassifier --> SelfRAG{Self-Reflective RAG Evaluator}
+    User([User / Web Dashboard / API Client]) --> Agentic[Agentic Graph-of-Thought Multi-Hop Decomposer]
+    Agentic -->|Sub-Query 1| Semantic[Embedding Dynamic Semantic Chunker]
+    Agentic -->|Sub-Query 2| Semantic
     
-    SelfRAG -->|Needs Retrieval| HybridSearch[BM25 + Dense Vector Hybrid Search]
-    SelfRAG -->|Direct Reply| FastReply[Direct Conversational Generator]
-    
+    Semantic --> HybridSearch[Pinecone Dense + BM25 Sparse Search]
     HybridSearch --> ReRanker[Cross-Encoder Re-Ranking Engine]
-    ReRanker --> ColBERT[ColBERT Late Interaction Matrix Scorer]
+    ReRanker --> ColBERT[ColBERT Late Interaction Engine]
     
-    ColBERT --> Generator[LLM Generator / Model Selector]
+    ColBERT --> Generator[LLM Answer Generator]
+    Generator --> Hallucination[NLI Premise-Entailment Hallucination Detector]
     
-    Generator --> CostMeter[Real-Time Token & Cost Metering Engine]
-    CostMeter --> DeckExporter[PowerPoint Deck & HTML Exporter]
-    DeckExporter --> User
+    Hallucination -- Factually Entailed --> Output([Verified Answer + Telemetry])
+    Hallucination -- Unfactually Entailed --> Correction[Self-Correction Query Rephraser Loop]
+    Correction --> HybridSearch
 ```
 
 ---
 
-## ✨ v5.0 Next-Gen Innovations
+## 🧠 Level 6 Apex Capabilities
 
-1. 🎯 **Cross-Encoder Re-Ranking** (`app/core/reranker.py`):
-   - Re-ranks candidate contexts via cross-entropy relevance scoring for optimal precision.
+1. 🧠 **Agentic Graph-of-Thought Multi-Hop Reasoning** (`app/core/agentic_reasoning.py`):
+   - Decomposes complex user queries into sub-questions, executes parallel vector/graph retrieval, and synthesizes unified multi-hop consensus answers.
 
-2. 📊 **Python Code & Data Sandbox** (`app/core/code_sandbox.py`):
-   - Executes mathematical, statistical, sum/average queries in an isolated execution environment.
+2. 🧬 **Embedding-Based Dynamic Semantic Chunking** (`app/core/semantic_chunking.py`):
+   - Splits document text based on semantic embedding sentence boundary shifts instead of arbitrary character limits.
 
-3. 🔄 **Self-Reflective RAG (Self-RAG)** (`app/core/self_rag.py`):
-   - Dynamically evaluates reflection tags (`[Retrieve]`, `[NoRetrieve]`) to prevent unnecessary LLM invocations.
+3. 🛡️ **NLI Premise-Entailment Hallucination Detector** (`app/core/hallucination_detector.py`):
+   - Sentence-by-sentence factuality verifier checking generated text against retrieved source premise context.
 
-4. 💰 **Real-Time Token & Cost Metering** (`app/core/cost_meter.py`):
-   - Calculates prompt/completion token spend ($ / 1k tokens) per model in real-time.
+4. 📊 **Automated Benchmark Harness & Latency Profiler** (`scripts/benchmark_harness.py`):
+   - Automated benchmark script computing overall RAG Triad scores, latency percentiles ($P_{50}, P_{95}, P_{99}$), and generating `benchmark_results.json`.
 
-5. 🎥 **Multi-Modal Media Indexer** (`app/core/multimodal.py`):
-   - STT transcript parsing for MP4/WAV video and audio files.
-
-6. 📐 **PDF Table OCR Engine** (`app/core/table_ocr.py`):
-   - Reconstructs PDF tables into queryable Markdown schemas.
-
-7. 📊 **PowerPoint (.pptx) Executive Deck Exporter** (`GET /api/v1/export/deck`):
-   - Export research findings into executive briefing slides.
-
-8. 🚀 **ArgoCD Canary Rollouts** (`deploy/argo/rollout.yaml`):
-   - Zero-downtime progressive deployment strategy.
+5. ⚡ **Real-Time Telemetry & Analytics API** (`GET /api/v1/analytics/realtime`):
+   - Serves real-time P50/P95 latency percentiles, throughput telemetry, and hallucination rates.
 
 ---
 
@@ -82,37 +73,56 @@ RAG-PROJECT/
 │   ├── api/
 │   │   └── v1/
 │   │       └── endpoints/
+│   │           ├── analytics.py    # Real-time telemetry
 │   │           ├── audit.py        # Audit export
 │   │           ├── export_deck.py  # PowerPoint deck export
 │   │           ├── gdpr.py         # GDPR purge
-│   │           ├── graph.py        # Graph API
+│   │           ├── graph.py        # Knowledge Graph API
 │   │           ├── ingest.py       # File ingestion
 │   │           ├── query.py        # Query API
-│   │           ├── report.py       # HTML report
+│   │           ├── report.py       # Executive HTML report
 │   │           └── workspace.py    # Collaborative workspaces
 │   ├── cache/                      # Redis & Semantic cache
-│   ├── core/                       # 16 Core RAG & Security engines
-│   ├── static/                     # Web Dashboard
+│   ├── core/                       # 19 Apex RAG & Security engines
+│   │   ├── agentic_reasoning.py    # Agentic multi-hop decomposer
+│   │   ├── circuit_breaker.py      # Multi-LLM Circuit Breaker
+│   │   ├── code_sandbox.py         # Python Code Sandbox
+│   │   ├── colbert.py              # ColBERT Late Interaction
+│   │   ├── cost_meter.py           # Real-Time Token Cost Meter
+│   │   ├── evaluator.py            # RAG Triad Evaluator
+│   │   ├── gdpr.py                 # GDPR Data Purge Engine
+│   │   ├── geo_replication.py      # Active-Active Geo-Replication
+│   │   ├── graph_rag.py            # Knowledge Graph engine
+│   │   ├── guardrails.py           # Guardrails AI PII & Injection shield
+│   │   ├── hallucination_detector.py # NLI Premise-Entailment Detector
+│   │   ├── hyde.py                 # HyDE retriever engine
+│   │   ├── injection_classifier.py # ML Injection Classifier
+│   │   ├── multimodal.py           # Multi-Modal STT Media Indexer
+│   │   ├── parent_child.py         # Parent-Child auto-merging
+│   │   ├── raptor.py               # RAPTOR tree summarizer
+│   │   ├── reranker.py             # Cross-Encoder Re-Ranker
+│   │   ├── semantic_chunking.py    # Dynamic Semantic Chunker
+│   │   ├── self_rag.py             # Self-Reflective RAG
+│   │   └── table_ocr.py            # PDF Table OCR Engine
+│   ├── static/                     # Web Dashboard Portal
 │   └── main.py                     # Entrypoint
-├── deploy/
-│   ├── argo/                       # ArgoCD Canary Rollout
-│   ├── helm/                       # Helm Chart
-│   └── terraform/                  # Terraform IaC
+├── deploy/                         # Terraform, Helm, ArgoCD
 ├── docs/                           # 15 Real documentation files
-├── scripts/                        # Benchmarks & Synthetic evals
+├── scripts/
+│   └── benchmark_harness.py        # Latency & RAG Triad profiler
 ├── tests/                          # Test suite (100% Pass)
 └── requirements.txt                # Dependencies
 ```
 
 ---
 
-## 🚀 Quick Start & Deployment
+## 🚀 Quick Start & Benchmark Execution
 
 ```bash
-# ArgoCD Canary Rollout
-kubectl apply -f deploy/argo/rollout.yaml
+# Run Automated RAG Benchmark Harness
+python scripts/benchmark_harness.py
 
-# Run Local Development Server
+# Run Development Server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -130,4 +140,4 @@ All unit tests pass 100%.
 
 ## 📄 License & Author
 
-Developed and maintained by **[udbhav968-creator](https://github.com/udbhav968-creator)**. Distributed under the MIT License.
+Developed and maintained by **[udbhav968-creator](https://github.com/udbhav968-creator)** (`snojkumar968@gmail.com`). Distributed under the MIT License.

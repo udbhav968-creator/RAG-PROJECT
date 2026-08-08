@@ -137,14 +137,16 @@ class TestRAGProject(unittest.TestCase):
         self.assertEqual(deck_res.status_code, 200)
         self.assertIn("EXECUTIVE BRIEFING", deck_res.text)
 
-    def test_16_workspace_list(self):
-        ws_res = self.client.get("/api/v1/workspace/list")
-        self.assertEqual(ws_res.status_code, 200)
-        data = ws_res.json()
-        self.assertIn("workspaces", data)
+    def test_17_realtime_analytics(self):
+        analytics_res = self.client.get("/api/v1/analytics/realtime")
+        self.assertEqual(analytics_res.status_code, 200)
+        data = analytics_res.json()
+        self.assertEqual(data["status"], "operational")
+        self.assertIn("latency_percentiles", data)
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
