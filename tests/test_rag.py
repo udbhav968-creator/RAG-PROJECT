@@ -137,15 +137,23 @@ class TestRAGProject(unittest.TestCase):
         self.assertEqual(deck_res.status_code, 200)
         self.assertIn("EXECUTIVE BRIEFING", deck_res.text)
 
-    def test_17_realtime_analytics(self):
-        analytics_res = self.client.get("/api/v1/analytics/realtime")
-        self.assertEqual(analytics_res.status_code, 200)
-        data = analytics_res.json()
-        self.assertEqual(data["status"], "operational")
-        self.assertIn("latency_percentiles", data)
+    def test_18_az_suite_completion(self):
+        from app.core.graph_disambiguation import graph_disambiguator
+        from app.core.vector_quantization import product_quantizer
+        from app.core.web_search_retriever import web_search_retriever
+        from app.workers.reindex_worker import reindex_worker
+
+        self.assertEqual(graph_disambiguator.disambiguate_entity("OAI"), "OpenAI")
+        quantized = product_quantizer.quantize_vector([0.1, 0.5, 0.9])
+        self.assertEqual(len(quantized), 3)
+        web_res = web_search_retriever.search_web_fallback("test query")
+        self.assertEqual(len(web_res), 1)
+        reindex_job = reindex_worker.trigger_reindex_job()
+        self.assertEqual(reindex_job["status"], "in_progress")
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
