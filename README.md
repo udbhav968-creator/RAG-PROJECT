@@ -36,32 +36,32 @@ An industrial-grade, production-tested **Retrieval-Augmented Generation (RAG)** 
 
 ```mermaid
 flowchart TD
-    User([User / Web Dashboard / API Client]) -->|POST /api/v1/query| MLGuard[ML Prompt Injection Classifier & Guardrails Shield]
+    User(["User / Web Dashboard / API Client"]) -->|POST /api/v1/query| MLGuard["ML Prompt Injection Classifier & Guardrails Shield"]
     
-    MLGuard -- Threat Detected --> Blocked[Return Blocked Guardrails Payload]
-    MLGuard -- Clean Prompt --> SelfRAG{Self-Reflective RAG Evaluator}
+    MLGuard -- "Threat Detected" --> Blocked["Return Blocked Guardrails Payload"]
+    MLGuard -- "Clean Prompt" --> SelfRAG{"Self-Reflective RAG Evaluator"}
     
-    SelfRAG -- Conversational Query --> DirectLLM[Direct Conversational LLM Generator]
-    SelfRAG -- Factual Knowledge Query --> AgenticDecomposer[Agentic Graph-of-Thought Query Decomposer]
+    SelfRAG -- "Conversational Query" --> DirectLLM["Direct Conversational LLM Generator"]
+    SelfRAG -- "Factual Knowledge Query" --> AgenticDecomposer["Agentic Graph-of-Thought Query Decomposer"]
     
-    AgenticDecomposer -->|Sub-Query 1| HybridSearch[BM25 Sparse + Pinecone Dense Hybrid Retriever]
+    AgenticDecomposer -->|Sub-Query 1| HybridSearch["BM25 Sparse + Pinecone Dense Hybrid Retriever"]
     AgenticDecomposer -->|Sub-Query 2| HybridSearch
     
-    HybridSearch --> ReRanker[Cross-Encoder Re-Ranking Engine]
-    ReRanker --> ColBERT[ColBERT Late Interaction Matrix Scorer]
+    HybridSearch --> ReRanker["Cross-Encoder Re-Ranking Engine"]
+    ReRanker --> ColBERT["ColBERT Late Interaction Matrix Scorer"]
     
-    ColBERT --> PrimaryLLM{Multi-LLM Circuit Breaker}
-    PrimaryLLM -- Primary OK --> OpenAI[OpenAI GPT-4 / Azure Provider]
-    PrimaryLLM -- API Outage / 429 --> BackupLLM[Anthropic Claude-3 / Local Fallback]
+    ColBERT --> PrimaryLLM{"Multi-LLM Circuit Breaker"}
+    PrimaryLLM -- "Primary OK" --> OpenAI["OpenAI GPT-4 / Azure Provider"]
+    PrimaryLLM -- "API Outage / 429" --> BackupLLM["Anthropic Claude-3 / Local Fallback"]
     
-    OpenAI --> Hallucination[NLI Premise-Entailment Hallucination Detector]
+    OpenAI --> Hallucination["NLI Premise-Entailment Hallucination Detector"]
     BackupLLM --> Hallucination
     
-    Hallucination -- Entailed (Score >= 0.70) --> CacheSave[Save to Semantic Vector Cache]
-    Hallucination -- Unentailed (Score < 0.70) --> SelfCorrection[Iterative Self-Correction Query Rephraser]
+    Hallucination -- "Entailed (Score >= 0.70)" --> CacheSave["Save to Semantic Vector Cache"]
+    Hallucination -- "Unentailed (Score < 0.70)" --> SelfCorrection["Iterative Self-Correction Query Rephraser"]
     SelfCorrection --> HybridSearch
     
-    CacheSave --> Response([Stream SSE Response / Executive Audit Report])
+    CacheSave --> Response(["Stream SSE Response / Executive Audit Report"])
 ```
 
 ---
@@ -70,17 +70,17 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Document([Raw PDF / DOCX / Text Document]) --> SemanticSplitter[Dynamic Semantic Sentence Chunker]
-    SemanticSplitter --> EntityExtractor[GraphRAG Entity-Relation Extractor]
+    Document(["Raw PDF / DOCX / Text Document"]) --> SemanticSplitter["Dynamic Semantic Sentence Chunker"]
+    SemanticSplitter --> EntityExtractor["GraphRAG Entity-Relation Extractor"]
     
-    EntityExtractor --> Disambiguator[Knowledge Graph Entity Disambiguator]
-    Disambiguator --> CanonicalMap{Canonical Entity Normalizer}
+    EntityExtractor --> Disambiguator["Knowledge Graph Entity Disambiguator"]
+    Disambiguator --> CanonicalMap{"Canonical Entity Normalizer"}
     
-    CanonicalMap -- Alias Detected ('OAI') --> CanonicalNode['OpenAI' Canonical Graph Node]
-    CanonicalMap -- Standard Entity --> GraphStore[(NetworkX Knowledge Graph Memory)]
+    CanonicalMap -- "Alias Detected ('OAI')" --> CanonicalNode["'OpenAI' Canonical Graph Node"]
+    CanonicalMap -- "Standard Entity" --> GraphStore[("NetworkX Knowledge Graph Memory")]
     CanonicalNode --> GraphStore
     
-    GraphStore --> D3Canvas[Interactive Web Dashboard Canvas Renderer]
+    GraphStore --> D3Canvas["Interactive Web Dashboard Canvas Renderer"]
 ```
 
 ---
@@ -107,15 +107,16 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    QueryInput([User Query Input]) --> Embedder[Text Embedding Engine]
-    Embedder --> QueryVector[Float32 Vector Embedding]
+    QueryInput(["User Query Input"]) --> Embedder["Text Embedding Engine"]
+    Embedder --> QueryVector["Float32 Vector Embedding"]
     
-    QueryVector --> SemanticCache{Sub-ms Semantic Vector Cache}
-    SemanticCache -- Similarity >= 0.92 --> CacheHit[Return Cached Response (<1ms)]
+    QueryVector --> SemanticCache{"Sub-ms Semantic Vector Cache"}
+    SemanticCache -- "Similarity >= 0.92" --> CacheHit["Return Cached Response (&lt;1ms)"]
     
-    SemanticCache -- Similarity < 0.92 --> ProductQuantizer[Product Quantizer uint8 Compression]
-    ProductQuantizer --> PineconeDB[(Pinecone Vector Database / Memory Index)]
+    SemanticCache -- "Similarity &lt; 0.92" --> ProductQuantizer["Product Quantizer uint8 Compression"]
+    ProductQuantizer --> PineconeDB[("Pinecone Vector Database / Memory Index")]
 ```
+
 
 ---
 
