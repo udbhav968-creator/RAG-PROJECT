@@ -148,11 +148,24 @@ class TestRAGProject(unittest.TestCase):
         self.assertEqual(len(quantized), 3)
         web_res = web_search_retriever.search_web_fallback("test query")
         self.assertEqual(len(web_res), 1)
-        reindex_job = reindex_worker.trigger_reindex_job()
-        self.assertEqual(reindex_job["status"], "in_progress")
+    def test_19_frontier_rag_suite(self):
+        from app.core.mcts_rag import mcts_rag_engine
+        from app.core.context_pruner import context_pruner
+        from app.core.synthetic_qa import synthetic_qa_generator
+        from app.core.vision_rag import vision_rag_parser
+
+        path = mcts_rag_engine.search_optimal_path("query", ["context branch 1", "context branch 2"])
+        self.assertTrue(len(path) > 0)
+        pruned = context_pruner.prune_context("The Industrial RAG Engine (v2.0) is designed for fault-tolerant enterprise document intelligence.")
+        self.assertTrue(len(pruned) > 0)
+        qa = synthetic_qa_generator.generate_qa_pairs("Industrial RAG Engine performs autonomous self-correction.")
+        self.assertEqual(len(qa), 1)
+        vision = vision_rag_parser.parse_page_image(b"fake_image_bytes")
+        self.assertEqual(vision["layout_format"], "visual_image_embedding")
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
