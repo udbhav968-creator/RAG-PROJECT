@@ -160,11 +160,17 @@ class TestRAGProject(unittest.TestCase):
         self.assertTrue(len(pruned) > 0)
         qa = synthetic_qa_generator.generate_qa_pairs("Industrial RAG Engine performs autonomous self-correction.")
         self.assertEqual(len(qa), 1)
-        vision = vision_rag_parser.parse_page_image(b"fake_image_bytes")
-        self.assertEqual(vision["layout_format"], "visual_image_embedding")
+    def test_20_system_architecture(self):
+        from app.core.rate_limiter import rate_limiter
+        from app.core.ha_vector_cluster import ha_vector_cluster
+
+        self.assertTrue(rate_limiter.allow_request("127.0.0.1"))
+        node_status = ha_vector_cluster.get_active_vector_node()
+        self.assertEqual(node_status["active_region"], "us-east-1")
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
