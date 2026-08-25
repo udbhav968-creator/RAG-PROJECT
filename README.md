@@ -1,4 +1,4 @@
-# ⚡ Industrial RAG Engine v8.0 Frontier RAG Architecture
+# ⚡ Industrial RAG Engine v10.0 Autonomous Multi-Agent & Data Intelligence Suite
 
 [![Build Status](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=githubactions)](https://github.com/udbhav968-creator/RAG-PROJECT)
 [![A-Z Coverage](https://img.shields.io/badge/A--Z%20Coverage-100%25%20(26%2F26)-blueviolet?style=for-the-badge)](https://github.com/udbhav968-creator/RAG-PROJECT)
@@ -7,45 +7,47 @@
 [![Pinecone](https://img.shields.io/badge/Pinecone-v3.0+-000000?style=for-the-badge&logo=pinecone)](https://pinecone.io)
 [![Redis](https://img.shields.io/badge/Redis-v7.0-DC382D?style=for-the-badge&logo=redis)](https://redis.io)
 
-Complete **Frontier RAG 8.0 Platform** featuring **Monte Carlo Tree Search (MCTS) Agentic RAG**, **Dynamic Context Pruning (LLMLingua)**, **Synthetic QA Dataset Generator**, **ColPali Multi-Modal Vision RAG**, **Agentic Graph-of-Thought Reasoning**, **NLI Hallucination Detector**, **Cross-Encoder Re-Ranking**, **Multi-LLM Circuit Breakers**, and **ArgoCD Zero-Downtime Canary Deployments**.
+Autonomous **Retrieval-Augmented Generation (RAG)** platform featuring **Autonomous Multi-Agent Debate Framework**, **Dynamic Vector Drift & Decay Detector**, **Semantic Query Auto-Completion**, **Visual Form & Table Structure Extractor**, **Monte Carlo Tree Search (MCTS) RAG**, **Dynamic Context Pruning**, **Synthetic QA Dataset Generator**, and **ColPali Multi-Modal Vision RAG**.
 
 ---
 
-## 🎯 Frontier Architecture Flowchart
+## 🎯 Autonomous Architecture Flowchart
 
 ```mermaid
 flowchart TD
-    User(["User / Web Dashboard / API Client"]) -->|POST /api/v1/query| MCTS["Monte Carlo Tree Search (MCTS) Agentic RAG"]
+    User(["User / Web Dashboard / API Client"]) --> Suggester["Semantic Query Auto-Completer Engine"]
+    Suggester --> Debate["Autonomous Multi-Agent Debate Framework (Retriever ➔ Critic ➔ Synthesizer)"]
     
-    MCTS -->|Explore Branch 1| HybridSearch["BM25 + Pinecone Dense Hybrid Search"]
-    MCTS -->|Explore Branch 2| HybridSearch
+    Debate --> DriftDetector["Dynamic Vector Drift & Decay Detector"]
+    DriftDetector -->|Fresh Vectors| MCTS["Monte Carlo Tree Search (MCTS) RAG"]
+    DriftDetector -->|Stale Vectors| Reindex["Trigger Vector Auto-Reindexing Worker"]
     
-    HybridSearch --> Pruner["Dynamic Context Pruner (LLMLingua)"]
-    Pruner --> ReRanker["Cross-Encoder Re-Ranking Engine"]
+    MCTS --> TableExtractor["Visual Form & Table Structure Extractor"]
+    TableExtractor --> Pruner["Dynamic Context Pruner (LLMLingua)"]
     
-    ReRanker --> LLM["Primary LLM Answer Generator"]
+    Pruner --> LLM["Primary LLM Answer Generator"]
     LLM --> Hallucination["NLI Premise-Entailment Hallucination Detector"]
     
-    Hallucination -- "Factually Entailed (>= 0.70)" --> Response(["Verified Answer + Synthetic QA Evaluation"])
+    Hallucination -- "Factually Entailed (>= 0.70)" --> Response(["Verified Answer + Multi-Agent Consensus"])
     Hallucination -- "Unentailed (< 0.70)" --> Rephrase["Self-Correction Query Loop"]
-    Rephrase --> HybridSearch
+    Rephrase --> Debate
 ```
 
 ---
 
-## 🚀 Frontier RAG 8.0 Capabilities
+## 🚀 v10.0 Autonomous & Intelligence Capabilities
 
-1. 🌲 **Monte Carlo Tree Search (MCTS) Agentic RAG** ([`app/core/mcts_rag.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/mcts_rag.py)):
-   - Evaluates multiple retrieval candidate branches using UCT rewards to find the highest relevance reasoning path.
+1. 🤖 **Autonomous Multi-Agent Debate Framework** ([`app/core/agent_debate.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/agent_debate.py)):
+   - Spawns specialized Retriever, Critic, and Synthesizer agents that debate context candidates to form a consensus.
 
-2. 🗜️ **Dynamic Context Pruning (LLMLingua)** ([`app/core/context_pruner.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/context_pruner.py)):
-   - Perplexity-based prompt context compressor cutting LLM token usage by up to 50% while preserving key entities.
+2. 📈 **Dynamic Vector Drift & Decay Detector** ([`app/core/vector_drift.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/vector_drift.py)):
+   - Tracks vector embedding distribution shifts over time to flag outdated document knowledge.
 
-3. 🧪 **Synthetic QA Dataset Generator** ([`app/core/synthetic_qa.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/synthetic_qa.py)):
-   - Self-generates synthetic question-answer pairs directly from ingested document corpora for CI/CD test suites.
+3. 🔍 **Semantic Query Auto-Completion Engine** ([`app/core/query_suggester.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/query_suggester.py)):
+   - Real-time search query prediction based on vector index semantic cluster matching.
 
-4. 👁️ **Multi-Modal Vision RAG Parser (ColPali)** ([`app/core/vision_rag.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/vision_rag.py)):
-   - Embeds PDF page layouts directly as visual images to preserve charts, tables, and blueprints without text OCR loss.
+4. 📊 **Visual Form & Table Structure Extractor** ([`app/core/table_extractor.py`](file:///c:/Users/Dell/Downloads/RAG-PROJECT/app/core/table_extractor.py)):
+   - Extracts multi-column financial tables and cell grid coordinates from structured PDF documents.
 
 ---
 

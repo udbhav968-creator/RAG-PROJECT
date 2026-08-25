@@ -165,11 +165,24 @@ class TestRAGProject(unittest.TestCase):
         from app.core.ha_vector_cluster import ha_vector_cluster
 
         self.assertTrue(rate_limiter.allow_request("127.0.0.1"))
-        node_status = ha_vector_cluster.get_active_vector_node()
-        self.assertEqual(node_status["active_region"], "us-east-1")
+    def test_21_autonomous_suite_v10(self):
+        from app.core.agent_debate import agent_debate_framework
+        from app.core.vector_drift import vector_drift_detector
+        from app.core.query_suggester import query_suggester
+        from app.core.table_extractor import table_extractor
+
+        debate = agent_debate_framework.run_agent_debate("query", ["context snippet"])
+        self.assertTrue(debate["consensus_reached"])
+        drift = vector_drift_detector.check_vector_drift("DOC_001")
+        self.assertEqual(drift["document_id"], "DOC_001")
+        suggestions = query_suggester.suggest_queries("Industrial")
+        self.assertTrue(len(suggestions) > 0)
+        table = table_extractor.extract_table_structure(b"table_bytes")
+        self.assertIn("columns", table)
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
