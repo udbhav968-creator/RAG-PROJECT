@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import Dict, Any, List, Optional
 from app.config import settings
 from app.core.retrieval import retrieve, retrieve_with_citations, embed_texts, upsert_vectors
@@ -29,6 +30,7 @@ from app.core.hallucination_detector import hallucination_detector
 from app.core.cost_meter import cost_meter
 from app.core.rate_limiter import rate_limiter
 from app.core.ha_vector_cluster import ha_vector_cluster
+from app.core.web_search_retriever import web_search_retriever
 from app.telemetry.tracing import tracer
 
 logger = logging.getLogger(__name__)
@@ -59,15 +61,15 @@ def _split_text_chunks(text: str, chunk_size: int = 500, chunk_overlap: int = 50
 
 class RAGPipeline:
     """
-    Master Enterprise RAG Pipeline Orchestrator (v10.0 Unified System):
-    Deeply integrates all 26+ RAG, Security, Evaluation, and High-Availability modules
-    into a single production execution workflow.
+    Quantum-Scale Enterprise RAG Pipeline Orchestrator (v12.0 Upgraded System):
+    Deeply integrates all 26+ RAG, Security, Multi-Agent, Web Fallback, and Evaluation engines
+    with dynamic confidence routing and parallel execution.
     """
     def __init__(self):
-        logger.info("Initializing Master Unified Enterprise RAGPipeline v10.0 Orchestrator.")
+        logger.info("Initializing Quantum-Scale Upgraded Enterprise RAGPipeline v12.0 Orchestrator.")
 
     def run_query(self, question: str, max_attempts: Optional[int] = None, model_name: str = None, client_ip: str = "127.0.0.1") -> Dict[str, Any]:
-        with tracer.start_span("master_rag_query_execution"):
+        with tracer.start_span("quantum_rag_query_execution"):
             if max_attempts is None:
                 max_attempts = settings.MAX_CORRECTION_ATTEMPTS
             target_model = model_name or settings.MODEL_NAME
@@ -126,6 +128,12 @@ class RAGPipeline:
             ha_status = ha_vector_cluster.get_active_vector_node()
             citation_items = retrieve_with_citations(sanitized_q, k=settings.TOP_K_RETRIEVAL)
             raw_contexts = [c["text"] for c in citation_items]
+
+            # Dynamic Web Search Fallback if local retrieval count is low
+            if len(raw_contexts) < 2:
+                web_results = web_search_retriever.search_web_fallback(sanitized_q)
+                for w in web_results:
+                    raw_contexts.append(f"[Live Web Result]: {w['snippet']}")
 
             # Step 7: RAPTOR Summaries & GraphRAG Multi-Hop Relational Retrieval
             raptor_summaries = raptor_engine.get_raptor_summaries(sanitized_q)
@@ -201,7 +209,7 @@ class RAGPipeline:
             return result
 
     def ingest_document_text(self, document_id: str, content: str, chunk_size: int = 500, chunk_overlap: int = 50) -> Dict[str, Any]:
-        with tracer.start_span("master_document_ingestion"):
+        with tracer.start_span("quantum_document_ingestion"):
             chunks = _split_text_chunks(content, chunk_size, chunk_overlap)
             if not chunks:
                 chunks = [content]
