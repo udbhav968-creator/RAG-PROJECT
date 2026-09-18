@@ -180,8 +180,16 @@ class TestRAGProject(unittest.TestCase):
         table = table_extractor.extract_table_structure(b"table_bytes")
         self.assertIn("columns", table)
 
+    def test_22_full_pipeline_orchestration(self):
+        from app.core.rag_pipeline import rag_pipeline
+        res = rag_pipeline.run_query("What is the Industrial RAG Engine?")
+        self.assertTrue(res.get("success", False))
+        self.assertIn("triad_scores", res)
+        self.assertIn("cost_telemetry", res)
+
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
