@@ -1,27 +1,48 @@
+"""
+Industrial RAG System - Main FastAPI Server Instance
+---------------------------------------------------
+Enterprise API Gateway orchestrating vector indexing, hybrid search,
+query self-correction, telemetry audit logging, and dashboard UI serving.
+"""
+
 import os
 import logging
-from fastapi import FastAPI
+from typing import Dict, Any, Optional
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, Response
-from app.api.v1.endpoints import query, ingest
-from app.core.retrieval import init_pinecone, get_all_documents
-from app.core.rag_pipeline import rag_pipeline
-from app.utils.logging import setup_logging
-from app.utils.metrics import metrics
+from fastapi.responses import FileResponse
+
 from app.config import settings
 from app.models import HealthResponse
+from app.utils.logging import setup_logging
+from app.utils.metrics import metrics
+from app.core.retrieval import init_pinecone, get_all_documents
+from app.core.rag_pipeline import rag_pipeline
+
+from app.api.v1.endpoints import (
+    query,
+    ingest,
+    audit,
+    graph,
+    report,
+    gdpr,
+    export_deck,
+    workspace,
+    analytics
+)
 
 setup_logging()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("IndustrialRAGServer")
 
 app = FastAPI(
-    title="Industrial RAG with AI Detection & Correction",
-    description="Enterprise Retrieval-Augmented Generation system with multi-attempt LLM faithfulness evaluation & query self-correction.",
+    title="Industrial RAG Engine with AI Detection & Correction",
+    description="Enterprise Retrieval-Augmented Generation system with multi-attempt LLM faithfulness evaluation and query self-correction.",
     version="2.0.0"
 )
 
-# Enable CORS
+# Enable CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOW_ORIGINS,
@@ -31,14 +52,14 @@ app.add_middleware(
 )
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
+    """Initializes vector stores and seeds baseline industrial knowledge base."""
     init_pinecone()
-    logger.info("Application started successfully.")
+    logger.info("FastAPI Server initialized successfully.")
     
-    # Seed initial knowledge base if empty so users can test immediately
     docs = get_all_documents()
     if not docs:
-        logger.info("Seeding initial industrial knowledge base documents...")
+        logger.info("Seeding baseline industrial documentation...")
         sample_doc_1 = (
             "The Industrial RAG Engine (v2.0) is designed for fault-tolerant enterprise document intelligence. "
             "It features an iterative self-correction loop that evaluates faithfulness score of generated answers. "
@@ -52,11 +73,9 @@ async def startup_event():
         )
         rag_pipeline.ingest_document_text("INDUSTRIAL_SPEC_001", sample_doc_1)
         rag_pipeline.ingest_document_text("ARCHITECTURE_GUIDE_002", sample_doc_2)
-        logger.info("Seed documents ingested successfully.")
+        logger.info("Baseline documentation ingested successfully.")
 
-from app.api.v1.endpoints import query, ingest, audit, graph, report, gdpr, export_deck, workspace, analytics
-
-# Mount API Routers
+# Register API Routers
 app.include_router(query.router, prefix="/api/v1", tags=["query"])
 app.include_router(ingest.router, prefix="/api/v1", tags=["ingest"])
 app.include_router(audit.router, prefix="/api/v1", tags=["audit"])
@@ -67,11 +86,9 @@ app.include_router(export_deck.router, prefix="/api/v1", tags=["export"])
 app.include_router(workspace.router, prefix="/api/v1", tags=["workspace"])
 app.include_router(analytics.router, prefix="/api/v1", tags=["analytics"])
 
-
-
-
 @app.get("/health", response_model=HealthResponse, tags=["monitoring"])
-async def health():
+async def health() -> HealthResponse:
+    """Returns application health metrics and infrastructure status."""
     summary = metrics.get_summary()
     return HealthResponse(
         status="healthy",
@@ -83,17 +100,19 @@ async def health():
     )
 
 @app.get("/metrics", tags=["monitoring"])
-async def get_metrics():
+async def get_metrics() -> Dict[str, Any]:
+    """Returns telemetry summary metrics."""
     return metrics.get_summary()
 
-# Mount Static Dashboard UI
+# Mount Static Front-End Dashboard UI
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/", include_in_schema=False)
-async def serve_dashboard():
+async def serve_dashboard() -> FileResponse:
+    """Serves index.html SPA dashboard interface."""
     index_file = os.path.join(static_dir, "index.html")
     if os.path.exists(index_file):
         return FileResponse(index_file)
-    return {"message": "Industrial RAG System API is running. Visit /docs for Swagger documentation."}
+    raise HTTPException(status_code=404, detail="Dashboard UI not found.")
