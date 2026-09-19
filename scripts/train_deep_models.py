@@ -1,8 +1,8 @@
 """
-Enterprise Deep Learning Model Training Engine
----------------------------------------------
-Fine-tunes transformer-based embedding models, cross-encoder re-rankers,
-and natural language inference (NLI) premise-entailment classifiers.
+Enterprise Real PyTorch & HuggingFace Model Training Engine
+------------------------------------------------------------
+Executes real PyTorch CUDA backpropagation fine-tuning using HuggingFace
+SentenceTransformers and Datasets without hardcoded fallback lists.
 """
 
 import os
@@ -11,147 +11,114 @@ import argparse
 import logging
 import json
 import time
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger("RAGTrainingEngine")
+logger = logging.getLogger("RealRAGTrainer")
 
-def load_training_dataset(dataset_name: str, sample_limit: Optional[int] = 50000) -> List[Any]:
-    """Loads and preprocesses real dataset pairs from HuggingFace repositories."""
-    logger.info(f"Loading dataset '{dataset_name}' with sample limit={sample_limit}...")
-    dataset_samples = []
+import torch
+from torch.utils.data import DataLoader
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer, InputExample, losses
+from sentence_transformers.cross_encoder import CrossEncoder
 
-    try:
-        from datasets import load_dataset
-        from sentence_transformers import InputExample
+def load_real_hf_dataset(dataset_name: str, sample_limit: int) -> List[InputExample]:
+    """Streams and parses real dataset records from HuggingFace Hub."""
+    logger.info(f"Streaming dataset '{dataset_name}' from HuggingFace Hub (sample_limit={sample_limit})...")
+    examples = []
 
-        target_hf_dataset = "microsoft/ms_marco" if dataset_name == "ms_marco" else dataset_name
-        hf_ds = load_dataset(target_hf_dataset, "v2.1", split=f"train[:{sample_limit}]")
-        
+    if dataset_name == "squad_v2":
+        hf_ds = load_dataset("squad_v2", split=f"train[:{sample_limit}]")
         for record in hf_ds:
-            query = record.get("query", "")
+            q = record.get("question", "")
+            c = record.get("context", "")
+            if q and c:
+                examples.append(InputExample(texts=[q, c], label=1.0))
+    else:
+        # Default to microsoft/ms_marco
+        hf_ds = load_dataset("microsoft/ms_marco", "v2.1", split=f"train[:{sample_limit}]")
+        for record in hf_ds:
+            q = record.get("query", "")
             passages = record.get("passages", {}).get("passage_text", [])
             is_selected = record.get("passages", {}).get("is_selected", [])
-            if query and passages:
-                label = 1.0 if (is_selected and is_selected[0] == 1) else 0.0
-                dataset_samples.append(InputExample(texts=[query, passages[0]], label=label))
+            if q and passages:
+                lbl = 1.0 if (is_selected and is_selected[0] == 1) else 0.0
+                examples.append(InputExample(texts=[q, passages[0]], label=lbl))
 
-        logger.info(f"Successfully loaded {len(dataset_samples)} genuine dataset records from HuggingFace!")
-    except Exception as exc:
-        logger.warning(f"HuggingFace dataset loader fallback ({exc}). Utilizing structured benchmark pairs.")
-        from sentence_transformers import InputExample
-        dataset_samples = [
-            InputExample(texts=["What is Retrieval-Augmented Generation?", "Retrieval-Augmented Generation combines dense vector retrieval with LLMs."], label=1.0),
-            InputExample(texts=["How does semantic cache work?", "Semantic cache matches incoming query embeddings using cosine similarity thresholds."], label=1.0),
-            InputExample(texts=["Explain multi-hop graph reasoning.", "GraphRAG extracts entity nodes and edge relations to traverse multi-hop contexts."], label=1.0),
-            InputExample(texts=["What is rocket propellant?", "RP-1 is a highly refined kerosene formulation used in liquid rocket engines."], label=1.0)
-        ]
+    logger.info(f"Loaded {len(examples)} real input examples from HuggingFace.")
+    return examples
 
-    return dataset_samples
-
-def train_embedding_transformer(dataset_samples: List[Any], epochs: int, batch_size: int, output_dir: str) -> str:
-    """Fine-tunes SentenceTransformer embedding model using CosineSimilarityLoss."""
-    logger.info(f"Initializing SentenceTransformer training for {epochs} epochs...")
-    os.makedirs(output_dir, exist_ok=True)
+def train_real_sentence_transformer(examples: List[InputExample], epochs: int, batch_size: int, output_dir: str) -> str:
+    """Executes real PyTorch backpropagation on SentenceTransformer architecture."""
+    logger.info(f"Initializing SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') on device: {device}...")
     checkpoint_dir = os.path.join(output_dir, "embedding_model_v1")
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
-    try:
-        import torch
-        from sentence_transformers import SentenceTransformer, losses
-        from torch.utils.data import DataLoader
+    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device=device)
+    train_dataloader = DataLoader(examples, shuffle=True, batch_size=batch_size)
+    train_loss = losses.CosineSimilarityLoss(model)
 
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Target execution hardware device: {device}")
-
-        model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device=device)
-        train_dataloader = DataLoader(dataset_samples, shuffle=True, batch_size=batch_size)
-        train_loss = losses.CosineSimilarityLoss(model)
-
-        model.fit(
-            train_objectives=[(train_dataloader, train_loss)],
-            epochs=epochs,
-            warmup_steps=max(10, len(dataset_samples) // 10),
-            output_path=checkpoint_dir,
-            show_progress_bar=False
-        )
-        logger.info(f"Embedding model training completed. Weights saved to '{checkpoint_dir}'.")
-    except Exception as err:
-        logger.warning(f"PyTorch execution error ({err}). Writing trained tensor state dict...")
-        save_tensor_weights(checkpoint_dir + ".pt")
-
+    logger.info(f"Starting model.fit() PyTorch CUDA backpropagation for {epochs} epochs...")
+    model.fit(
+        train_objectives=[(train_dataloader, train_loss)],
+        epochs=epochs,
+        warmup_steps=max(10, len(examples) // batch_size),
+        output_path=checkpoint_dir,
+        show_progress_bar=True
+    )
+    logger.info(f"Saved real trained HuggingFace model checkpoint to '{checkpoint_dir}'.")
     return checkpoint_dir
 
-def train_cross_encoder_reranker(dataset_samples: List[Any], epochs: int, batch_size: int, output_dir: str) -> str:
-    """Fine-tunes CrossEncoder model for passage relevance scoring."""
-    logger.info(f"Initializing CrossEncoder re-ranker training for {epochs} epochs...")
-    os.makedirs(output_dir, exist_ok=True)
+def train_real_cross_encoder(examples: List[InputExample], epochs: int, batch_size: int, output_dir: str) -> str:
+    """Executes real PyTorch backpropagation on CrossEncoder re-ranker architecture."""
+    logger.info(f"Initializing CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2') on device: {device}...")
     checkpoint_dir = os.path.join(output_dir, "reranker_model_v1")
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
-    try:
-        import torch
-        from sentence_transformers import InputExample
-        from sentence_transformers.cross_encoder import CrossEncoder
-        from torch.utils.data import DataLoader
+    model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2", num_labels=1, device=device)
+    train_dataloader = DataLoader(examples, shuffle=True, batch_size=batch_size)
 
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2", num_labels=1, device=device)
-        train_dataloader = DataLoader(dataset_samples, shuffle=True, batch_size=batch_size)
-
-        model.fit(
-            train_dataloader=train_dataloader,
-            epochs=epochs,
-            warmup_steps=max(5, len(dataset_samples) // 10),
-            output_path=checkpoint_dir,
-            show_progress_bar=False
-        )
-        logger.info(f"Cross-Encoder re-ranker training completed. Weights saved to '{checkpoint_dir}'.")
-    except Exception as err:
-        logger.warning(f"PyTorch execution error ({err}). Writing trained tensor state dict...")
-        save_tensor_weights(checkpoint_dir + ".pt")
-
+    logger.info(f"Starting CrossEncoder model.fit() PyTorch backpropagation for {epochs} epochs...")
+    model.fit(
+        train_dataloader=train_dataloader,
+        epochs=epochs,
+        warmup_steps=max(5, len(examples) // batch_size),
+        output_path=checkpoint_dir,
+        show_progress_bar=True
+    )
+    logger.info(f"Saved real trained CrossEncoder checkpoint to '{checkpoint_dir}'.")
     return checkpoint_dir
 
-def save_tensor_weights(filepath: str) -> None:
-    """Exports raw float32 tensor weight checkpoint."""
-    try:
-        import torch
-        state_dict = {"layer.weight": torch.randn(384, 384), "layer.bias": torch.zeros(384)}
-        torch.save(state_dict, filepath)
-    except Exception:
-        import numpy as np
-        np.save(filepath + ".npy", np.random.randn(384, 384))
-
-def main():
-    parser = argparse.ArgumentParser(description="Enterprise PyTorch Model Training Engine")
-    parser.add_argument("--dataset", type=str, default="ms_marco", help="Dataset selector")
-    parser.add_argument("--epochs", type=int, default=20, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=32, help="Training batch size")
-    parser.add_argument("--sample_limit", type=int, default=50000, help="Maximum training samples to stream")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Real PyTorch HuggingFace Training Engine")
+    parser.add_argument("--dataset", type=str, default="squad_v2", help="Dataset name on HuggingFace Hub")
+    parser.add_argument("--epochs", type=int, default=10, help="Total training epochs")
+    parser.add_argument("--batch_size", type=int, default=32, help="DataLoader batch size")
+    parser.add_argument("--sample_limit", type=int, default=10000, help="Number of records to stream from dataset")
     parser.add_argument("--output_dir", type=str, default="models/checkpoints", help="Output directory for model weights")
     args = parser.parse_args()
 
-    start_timestamp = time.time()
-    logger.info("Starting enterprise model training pipeline...")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    logger.info(f"PyTorch CUDA Status: {torch.cuda.is_available()} | Active Device: {device}")
 
-    samples = load_training_dataset(args.dataset, args.sample_limit)
-    emb_path = train_embedding_transformer(samples, args.epochs, args.batch_size, args.output_dir)
-    rerank_path = train_cross_encoder_reranker(samples, args.epochs, args.batch_size, args.output_dir)
+    start_time = time.time()
+    dataset_records = load_real_hf_dataset(args.dataset, args.sample_limit)
+    
+    emb_checkpoint = train_real_sentence_transformer(dataset_records, args.epochs, args.batch_size, args.output_dir)
+    rerank_checkpoint = train_real_cross_encoder(dataset_records, args.epochs, args.batch_size, args.output_dir)
 
-    manifest = {
-        "status": "success",
-        "dataset_name": args.dataset,
-        "samples_count": len(samples),
+    manifest_data = {
+        "status": "training_completed",
+        "device": device,
+        "dataset": args.dataset,
+        "records_trained": len(dataset_records),
         "epochs": args.epochs,
         "batch_size": args.batch_size,
-        "training_time_seconds": round(time.time() - start_timestamp, 2),
-        "checkpoints": [emb_path, rerank_path]
+        "total_time_seconds": round(time.time() - start_time, 2),
+        "checkpoints": [emb_checkpoint, rerank_checkpoint]
     }
+    manifest_path = os.path.join(args.output_dir, "training_manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest_data, f, indent=2)
 
-    manifest_file = os.path.join(args.output_dir, "training_manifest.json")
-    with open(manifest_file, "w") as fp:
-        json.dump(manifest, fp, indent=2)
-
-    logger.info(f"Training pipeline execution finished. Manifest written to '{manifest_file}'.")
-
-if __name__ == "__main__":
-    main()
+    logger.info(f"Training pipeline finished cleanly in {manifest_data['total_time_seconds']}s. Manifest: '{manifest_path}'.")
