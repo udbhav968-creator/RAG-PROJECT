@@ -3,6 +3,7 @@ import json
 import logging
 from app.core.rag_pipeline import rag_pipeline
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 BENCHMARK_PROMPTS = [
@@ -12,7 +13,7 @@ BENCHMARK_PROMPTS = [
 ]
 
 def run_benchmark():
-    print("🚀 Starting Industrial RAG Level 6 Benchmark Harness...")
+    logger.info("Starting Industrial RAG Level 6 Benchmark Harness...")
     results = []
     start_all = time.time()
 
@@ -25,7 +26,7 @@ def run_benchmark():
             "latency_ms": round(dt, 2),
             "faithfulness": res.get("triad_scores", {}).get("faithfulness", 1.0)
         })
-        print(f"  - Prompt: '{prompt[:30]}...' -> Latency: {dt:.2f}ms | Faithfulness: 100%")
+        logger.info(f"Prompt: '{prompt[:30]}...' -> Latency: {dt:.2f}ms | Faithfulness: 1.00")
 
     total_time = round(time.time() - start_all, 2)
     output = {
@@ -38,7 +39,8 @@ def run_benchmark():
     with open("benchmark_results.json", "w") as f:
         json.dump(output, f, indent=2)
 
-    print(f"✅ Benchmark Complete! Results saved to 'benchmark_results.json'.")
+    logger.info("Benchmark Complete. Results saved to 'benchmark_results.json'.")
 
 if __name__ == '__main__':
     run_benchmark()
+

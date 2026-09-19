@@ -28,7 +28,7 @@ class ExecutiveReportGenerator:
   </style>
 </head>
 <body>
-  <h1>📊 Industrial RAG Executive Audit Report</h1>
+  <h1>Industrial RAG Executive Audit Report</h1>
   <div class="card">
     <h2>Prompt Question</h2>
     <p>"{question}"</p>

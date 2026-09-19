@@ -1,14 +1,14 @@
-"""
-Industrial RAG Triad Metrics Benchmark Suite
-Evaluates Faithfulness, Answer Relevance, Context Precision, and Context Recall across benchmark queries.
-"""
 import time
 import json
+import logging
 from app.core.rag_pipeline import rag_pipeline
 from app.core.evaluator import triad_evaluator
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 def run_triad_benchmark():
-    print("🏆 Starting RAG Triad Evaluation Benchmark...")
+    logger.info("Starting RAG Triad Evaluation Benchmark...")
     test_queries = [
         "What is the Industrial RAG Engine and how does it work?",
         "How does the self-correction loop evaluate faithfulness score?",
@@ -27,16 +27,14 @@ def run_triad_benchmark():
             "triad_scores": triad,
             "final_answer": res.get("final_answer", "")[:120] + "..."
         })
-        print(f"\n  [✓] Query: '{q[:35]}...'")
-        print(f"      Selected Tool: {res.get('selected_tool')}")
-        print(f"      Faithfulness: {triad.get('faithfulness')} | Relevance: {triad.get('answer_relevance')} | Precision: {triad.get('context_precision')} | Recall: {triad.get('context_recall')}")
-        print(f"      Triad Average: {triad.get('triad_average')}")
+        logger.info(f"Query: '{q[:35]}...' | Tool: {res.get('selected_tool')} | Faithfulness: {triad.get('faithfulness')} | Relevance: {triad.get('answer_relevance')} | Precision: {triad.get('context_precision')} | Recall: {triad.get('context_recall')} | Triad Average: {triad.get('triad_average')}")
 
     total_time = round(time.time() - start_time, 2)
     avg_triad = round(sum(d["triad_scores"].get("triad_average", 0) for d in benchmark_data) / len(benchmark_data), 3)
     
-    print(f"\n✨ Benchmark Finished in {total_time}s! Average RAG Triad Score: {avg_triad}")
+    logger.info(f"Benchmark Finished in {total_time}s. Average RAG Triad Score: {avg_triad}")
     return {"total_time": total_time, "average_triad_score": avg_triad, "details": benchmark_data}
 
 if __name__ == "__main__":
     run_triad_benchmark()
+
