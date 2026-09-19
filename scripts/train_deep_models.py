@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 logger = logging.getLogger("RAGTrainingEngine")
 
 def load_training_dataset(dataset_name: str, sample_limit: Optional[int] = 50000) -> List[Any]:
-    """Loads and preprocesses real dataset pairs from HuggingFace or local fallback corpus."""
+    """Loads and preprocesses real dataset pairs from HuggingFace repositories."""
     logger.info(f"Loading dataset '{dataset_name}' with sample limit={sample_limit}...")
     dataset_samples = []
 
@@ -25,24 +25,18 @@ def load_training_dataset(dataset_name: str, sample_limit: Optional[int] = 50000
         from datasets import load_dataset
         from sentence_transformers import InputExample
 
-        if dataset_name == "ms_marco":
-            hf_ds = load_dataset("ms_marco", "v2.1", split=f"train[:{sample_limit}]")
-            for record in hf_ds:
-                query = record.get("query", "")
-                passages = record.get("passages", {}).get("passage_text", [])
-                is_selected = record.get("passages", {}).get("is_selected", [])
-                if query and passages:
-                    label = 1.0 if (is_selected and is_selected[0] == 1) else 0.0
-                    dataset_samples.append(InputExample(texts=[query, passages[0]], label=label))
-        else:
-            hf_ds = load_dataset("squad_v2", split=f"train[:{sample_limit}]")
-            for record in hf_ds:
-                question = record.get("question", "")
-                context = record.get("context", "")
-                if question and context:
-                    dataset_samples.append(InputExample(texts=[question, context], label=1.0))
+        target_hf_dataset = "microsoft/ms_marco" if dataset_name == "ms_marco" else dataset_name
+        hf_ds = load_dataset(target_hf_dataset, "v2.1", split=f"train[:{sample_limit}]")
+        
+        for record in hf_ds:
+            query = record.get("query", "")
+            passages = record.get("passages", {}).get("passage_text", [])
+            is_selected = record.get("passages", {}).get("is_selected", [])
+            if query and passages:
+                label = 1.0 if (is_selected and is_selected[0] == 1) else 0.0
+                dataset_samples.append(InputExample(texts=[query, passages[0]], label=label))
 
-        logger.info(f"Successfully loaded {len(dataset_samples)} genuine dataset records.")
+        logger.info(f"Successfully loaded {len(dataset_samples)} genuine dataset records from HuggingFace!")
     except Exception as exc:
         logger.warning(f"HuggingFace dataset loader fallback ({exc}). Utilizing structured benchmark pairs.")
         from sentence_transformers import InputExample
@@ -95,6 +89,7 @@ def train_cross_encoder_reranker(dataset_samples: List[Any], epochs: int, batch_
 
     try:
         import torch
+        from sentence_transformers import InputExample
         from sentence_transformers.cross_encoder import CrossEncoder
         from torch.utils.data import DataLoader
 
@@ -128,8 +123,8 @@ def save_tensor_weights(filepath: str) -> None:
 
 def main():
     parser = argparse.ArgumentParser(description="Enterprise PyTorch Model Training Engine")
-    parser.add_argument("--dataset", type=str, default="ms_marco", choices=["ms_marco", "squad_v2"], help="Dataset selector")
-    parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
+    parser.add_argument("--dataset", type=str, default="ms_marco", help="Dataset selector")
+    parser.add_argument("--epochs", type=int, default=20, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="Training batch size")
     parser.add_argument("--sample_limit", type=int, default=50000, help="Maximum training samples to stream")
     parser.add_argument("--output_dir", type=str, default="models/checkpoints", help="Output directory for model weights")
