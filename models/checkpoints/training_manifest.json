@@ -1,0 +1,10 @@
+{
+  "huggingface_model_training": true,
+  "dataset_used": "ms_marco",
+  "epochs": 3,
+  "batch_size": 16,
+  "checkpoints": [
+    "models/checkpoints\\embedding_model_v1",
+    "models/checkpoints\\reranker_model_v1"
+  ]
+}
